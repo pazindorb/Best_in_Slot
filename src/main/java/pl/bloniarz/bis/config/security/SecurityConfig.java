@@ -3,6 +3,7 @@ package pl.bloniarz.bis.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -35,16 +36,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers(HttpMethod.GET,"/api/items/adminonly").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET,"/api/items/user").hasAnyRole("ADMIN","USER")
                 .anyRequest().permitAll();
 
         http
                 .csrf().disable()
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-                .and()
-                .formLogin()
-                    .permitAll()
 
                 .and()
                 .exceptionHandling()

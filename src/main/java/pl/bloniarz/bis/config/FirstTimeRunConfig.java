@@ -28,7 +28,7 @@ public class FirstTimeRunConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        populateDatabaseWithWowheadItems();
+        //populateDatabaseWithWowheadItems();
         populateAuthoritiesAndCreateAdmin();
     }
 
@@ -50,7 +50,6 @@ public class FirstTimeRunConfig implements CommandLineRunner {
                 .build()));
 
         String password = encoder.encode("adminpassword");
-
         UserEntity userEntity = UserEntity.builder()
                 .email("bloniarzpatryk@gmail.pl")
                 .login("administrator")

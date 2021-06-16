@@ -17,6 +17,7 @@ import pl.bloniarz.bis.model.dto.request.user.UserRegisterRequest;
 import pl.bloniarz.bis.repository.AuthorityRepository;
 import pl.bloniarz.bis.repository.UserRepository;
 
+import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class UserService {
     private final UserDetailsService detailsService;
     private final JwtUtil jwtUtil;
 
-    public void registerUser(UserRegisterRequest userRegisterRequest){
+    public void register(UserRegisterRequest userRegisterRequest){
         List<UserAuthorityEntity> authority = Collections.singletonList(authorityRepository.findByAuthority("ROLE_USER"));
 
         if(userRepository.findByLogin(userRegisterRequest.getLogin()).isPresent() ||
@@ -49,14 +50,26 @@ public class UserService {
     }
 
 
-    public String loginUser(UserLoginRequest userLoginRequest) {
-        authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(
-                        userLoginRequest.getLogin(),
-                        userLoginRequest.getPassword()
-                ));
-
+    public Cookie login(UserLoginRequest userLoginRequest) {
+        try{
+            authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            userLoginRequest.getLogin(),
+                            userLoginRequest.getPassword()
+                    ));
+        } catch(Exception e) {
+            throw new AppException(AppErrorMessage.LOGIN_FAILED);
+        }
         UserDetails user = detailsService.loadUserByUsername(userLoginRequest.getLogin());
-        return jwtUtil.generateToken(user);
+        Cookie cookie = new Cookie("authorization", jwtUtil.generateToken(user) );
+        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setPath("/");
+        return cookie;
+    }
+
+    public Cookie logout(Cookie cookie){
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        return cookie;
     }
 }

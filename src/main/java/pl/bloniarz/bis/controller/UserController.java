@@ -5,14 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.request.user.UserLoginRequest;
 import pl.bloniarz.bis.model.dto.request.user.UserRegisterRequest;
-import pl.bloniarz.bis.model.dto.response.LoginSuccessfullyResponse;
+import pl.bloniarz.bis.model.dto.response.SimpleMessageResponse;
 import pl.bloniarz.bis.service.UserService;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/api/users")
@@ -24,19 +28,28 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void registerUser(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
-        userService.registerUser(userRegistrationRequest);
+    public void register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
+        userService.register(userRegistrationRequest);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginSuccessfullyResponse> loginUser(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
-        Cookie cookie = new Cookie("authorization", userService.loginUser(userLoginRequest));
-        cookie.setMaxAge(60 * 60 * 24);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+    public ResponseEntity<SimpleMessageResponse> login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
+        response.addCookie(userService.login(userLoginRequest));
         return ResponseEntity
                 .ok()
-                .body(new LoginSuccessfullyResponse(userLoginRequest.getLogin()));
+                .body(new SimpleMessageResponse("Login successful for: " + userLoginRequest.getLogin()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<SimpleMessageResponse> logout(HttpServletRequest request, HttpServletResponse response){
+        Cookie cookie = Arrays.stream(request.getCookies())
+                .filter(cookies -> "authorization".equals(cookies.getName()))
+                .findAny()
+                .orElseThrow(() -> new AppException(AppErrorMessage.LOGOUT_FAILED));
+        response.addCookie(userService.logout(cookie));
+        return ResponseEntity
+                .ok()
+                .body(new SimpleMessageResponse("Logout successful"));
     }
 
 }

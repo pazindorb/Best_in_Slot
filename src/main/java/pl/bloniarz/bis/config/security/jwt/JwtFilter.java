@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -29,29 +31,42 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        Cookie authorizationCookie = request.getCookies() == null ? null : Arrays.stream(request.getCookies()).
-                filter(cookie -> "authorization".equals(cookie.getName())).findAny().orElse(null);
+        Cookie authorizationCookie = request.getCookies() == null ? null :
+                Arrays.stream(request.getCookies())
+                        .filter(cookie -> "authorization".equals(cookie.getName()))
+                        .findAny()
+                        .orElse(null);
 
-        String username = null;
-        String token = null;
-        if (authorizationCookie != null) {
-            token = authorizationCookie.getValue();
-            username = jwtUtil.extractUserName(token);
-        }
+        if (authorizationCookie == null)
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "No \"authorization\" cookie found.");
+        String token = authorizationCookie.getValue();
+        String username = jwtUtil.extractUserName(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = detailsService.loadUserByUsername(username);
+        if (username == null)
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Could not extract username from token.");
+        if(SecurityContextHolder.getContext().getAuthentication() != null)
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "SecurityContextHolder.getContext().getAuthentication() != null.");
+        UserDetails userDetails = detailsService.loadUserByUsername(username);
 
-            if (jwtUtil.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+        if (!jwtUtil.validateToken(token, userDetails))
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Token cannot be validated.");
 
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
-        }
-
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request, response);
+    }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+            throws ServletException {
+        String path = request.getRequestURI();
+        Boolean notFilteredPaths = "/api/users".equals(path)
+                || "/api/users/login".equals(path)
+                || "/api/items/ffa".equals(path)
+                ;
+
+        return notFilteredPaths;
     }
 }
