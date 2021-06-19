@@ -3,10 +3,14 @@ package pl.bloniarz.bis.config.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
 
 import javax.servlet.http.Cookie;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +23,7 @@ public class JwtUtil {
 
     public JwtUtil(){
         this.secret = "gpoauv23124favngo!3213";
-        this.expireTime = 1000 * 60 * 60 * 24;
+        this.expireTime = 1000 * 10;
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -40,6 +44,20 @@ public class JwtUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String refreshToken(String token){
+
+        return token;
+    }
+
+    public String extractTokenFromCookies(Cookie[] cookies){
+        Cookie cookie = Arrays.stream(cookies)
+                .filter(c -> "authorization".equals(c.getName()))
+                .findAny()
+                .orElseThrow(() -> new AppException(AppErrorMessage.COOKIE_NOT_FOUND));
+
+        return cookie.getValue();
     }
 
     public String extractUserName(String token) {

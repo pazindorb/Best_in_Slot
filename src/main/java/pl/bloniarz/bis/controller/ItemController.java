@@ -20,9 +20,4 @@ public class ItemController {
         return "HELLO USER!";
     }
 
-    @GetMapping("/ffa")
-    public String helloFFA(){
-        return "HELLO FREE!";
-    }
-
 }

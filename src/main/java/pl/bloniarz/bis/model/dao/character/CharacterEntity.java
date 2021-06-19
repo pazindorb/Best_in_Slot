@@ -27,6 +27,8 @@ public class CharacterEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    private String name;
+
     @Enumerated
     private CharacterClasses characterClass;
 

@@ -28,28 +28,27 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
+    public SimpleMessageResponse register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
         userService.register(userRegistrationRequest);
+        return new SimpleMessageResponse(userRegistrationRequest.getLogin() + " registered");
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")
-    public ResponseEntity<SimpleMessageResponse> login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
+    public SimpleMessageResponse login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
         response.addCookie(userService.login(userLoginRequest));
-        return ResponseEntity
-                .ok()
-                .body(new SimpleMessageResponse("Login successful for: " + userLoginRequest.getLogin()));
+        return new SimpleMessageResponse("Login successful for: " + userLoginRequest.getLogin());
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/logout")
-    public ResponseEntity<SimpleMessageResponse> logout(HttpServletRequest request, HttpServletResponse response){
+    public SimpleMessageResponse logout(HttpServletRequest request, HttpServletResponse response){
         Cookie cookie = Arrays.stream(request.getCookies())
                 .filter(cookies -> "authorization".equals(cookies.getName()))
                 .findAny()
                 .orElseThrow(() -> new AppException(AppErrorMessage.LOGOUT_FAILED));
         response.addCookie(userService.logout(cookie));
-        return ResponseEntity
-                .ok()
-                .body(new SimpleMessageResponse("Logout successful"));
+        return new SimpleMessageResponse("Logout successful");
     }
 
 }
