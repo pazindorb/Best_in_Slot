@@ -23,7 +23,7 @@ public class JwtUtil {
 
     public JwtUtil(){
         this.secret = "gpoauv23124favngo!3213";
-        this.expireTime = 1000 * 10;
+        this.expireTime = 1000 * 60 * 60;
     }
 
     public String generateToken(UserDetails userDetails) {

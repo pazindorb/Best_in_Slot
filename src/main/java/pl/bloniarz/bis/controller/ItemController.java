@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/items")
+@RequestMapping("/api/items")
 public class ItemController {
 
     @GetMapping("/adminonly")
