@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/items")
+@RequestMapping("/api/items")
 public class ItemController {
 
     @GetMapping("/adminonly")
@@ -18,11 +18,6 @@ public class ItemController {
     @GetMapping("/user")
     public String hello(){
         return "HELLO USER!";
-    }
-
-    @GetMapping("/ffa")
-    public String helloFFA(){
-        return "HELLO FREE!";
     }
 
 }

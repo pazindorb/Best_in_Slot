@@ -31,15 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        Cookie authorizationCookie = request.getCookies() == null ? null :
-                Arrays.stream(request.getCookies())
-                        .filter(cookie -> "authorization".equals(cookie.getName()))
-                        .findAny()
-                        .orElse(null);
-
-        if (authorizationCookie == null)
-            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "No \"authorization\" cookie found.");
-        String token = authorizationCookie.getValue();
+        String token = jwtUtil.extractTokenFromCookies(request.getCookies());
         String username = jwtUtil.extractUserName(token);
 
         if (username == null)
@@ -64,7 +56,6 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         Boolean notFilteredPaths = "/api/users".equals(path)
                 || "/api/users/login".equals(path)
-                || "/api/items/ffa".equals(path)
                 ;
 
         return notFilteredPaths;
