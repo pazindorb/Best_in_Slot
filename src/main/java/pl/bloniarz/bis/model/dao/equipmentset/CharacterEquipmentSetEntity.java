@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.bloniarz.bis.model.dao.character.CharacterEntity;
-import pl.bloniarz.bis.model.dao.item.ItemStatsEntity;
+import pl.bloniarz.bis.model.dao.item.ItemEntity;
 
 import javax.persistence.*;
 
@@ -30,51 +30,51 @@ public class CharacterEquipmentSetEntity {
     private CharacterEntity character;
 
     @OneToOne
-    private ItemStatsEntity head;
+    private ItemEntity head;
 
     @OneToOne
-    private ItemStatsEntity neck;
+    private ItemEntity neck;
 
     @OneToOne
-    private ItemStatsEntity shoulders;
+    private ItemEntity shoulders;
 
     @OneToOne
-    private ItemStatsEntity chest;
+    private ItemEntity chest;
 
     @OneToOne
-    private ItemStatsEntity back;
+    private ItemEntity back;
 
     @OneToOne
-    private ItemStatsEntity wrists;
+    private ItemEntity wrists;
 
     @OneToOne
-    private ItemStatsEntity hands;
+    private ItemEntity hands;
 
     @OneToOne
-    private ItemStatsEntity waist;
+    private ItemEntity waist;
 
     @OneToOne
-    private ItemStatsEntity legs;
+    private ItemEntity legs;
 
     @OneToOne
-    private ItemStatsEntity feet;
+    private ItemEntity feet;
 
     @OneToOne
-    private ItemStatsEntity firstRing;
+    private ItemEntity firstRing;
 
     @OneToOne
-    private ItemStatsEntity secondRing;
+    private ItemEntity secondRing;
 
     @OneToOne
-    private ItemStatsEntity firstTrinket;
+    private ItemEntity firstTrinket;
 
     @OneToOne
-    private ItemStatsEntity secondTrinket;
+    private ItemEntity secondTrinket;
 
     @OneToOne
-    private ItemStatsEntity mainHand;
+    private ItemEntity mainHand;
 
     @OneToOne
-    private ItemStatsEntity offHand;
+    private ItemEntity offHand;
 
 }
