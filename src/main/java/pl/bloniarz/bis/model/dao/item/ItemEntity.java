@@ -25,16 +25,42 @@ public class ItemEntity {
 
     private String name;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ItemTypes type;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ItemSlots slot;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval=true)
-    private List<ItemStatsEntity> stats;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "ITEM_STAT",
+            joinColumns = { @JoinColumn(name = "item_id") },
+            inverseJoinColumns = { @JoinColumn(name = "equation_id") }
+    )
+    private List<StatsEquationEntity> stats;
 
+    private double stamina;
+    private double strength;
+    private double agility;
+    private double intelligence;
+    private double secondary;
+    private double mastery;
+    private double criticalStrike;
+    private double haste;
+    private double versatility;
+
+    private boolean old;
     private String dropInstance;
     private String wowheadLink;
 
+
+    public void setStatsBothWay(List<StatsEquationEntity> statsEquationsDependingOnSlot) {
+        statsEquationsDependingOnSlot.forEach(statsEquationEntity -> {
+            List <ItemEntity> newList = statsEquationEntity.getItem();
+            newList.add(this);
+            statsEquationEntity.setItem(newList);
+        });
+
+        setStats(statsEquationsDependingOnSlot);
+    }
 }
