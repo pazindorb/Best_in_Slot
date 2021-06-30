@@ -38,21 +38,26 @@ public class CharacterService {
     }
 
     public String addCharacter(Character character, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
+        String activeUser = jwtUtil.extractNameFromCookies(cookies);
         UserEntity userEntity = userRepository.findByLogin(activeUser)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, activeUser));
+        try{
+            characterRepository.save(CharacterEntity.builder()
+                    .user(userEntity)
+                    .name(character.getName())
+                    .characterClass(CharacterClasses.valueOf(character.getCharacterClass()))
+                    .characterEquipmentSets(new ArrayList<>())
+                    .build());
+        }
+        catch (Exception e){
+            throw new AppException(AppErrorMessage.CHARACTER_ALREADY_EXISTS);
+        }
 
-        characterRepository.save(CharacterEntity.builder()
-                .user(userEntity)
-                .name(character.getName())
-                .characterClass(CharacterClasses.valueOf(character.getCharacterClass()))
-                .characterEquipmentSets(new ArrayList<>())
-                .build());
         return activeUser;
     }
 
     public String deleteCharacter(long id, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
+        String activeUser = jwtUtil.extractNameFromCookies(cookies);
 
         CharacterEntity characterEntity = characterRepository.findById(id)
                 .filter(character -> character.getUser().getLogin().equals(activeUser))

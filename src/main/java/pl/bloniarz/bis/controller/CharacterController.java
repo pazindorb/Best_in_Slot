@@ -19,13 +19,13 @@ public class CharacterController {
     private final CharacterService characterService;
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("")
+    @GetMapping
     public AllUsersCharactersResponse getAllCharactersForUser(HttpServletRequest request){
         return characterService.getAllCharactersForUser(request.getCookies());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
+    @PostMapping
     public SimpleMessageResponse addCharacter(@RequestBody Character character, HttpServletRequest request){
         String activeUser = characterService.addCharacter(character, request.getCookies());
         return new SimpleMessageResponse(character.getName() + " added to user: " + activeUser);

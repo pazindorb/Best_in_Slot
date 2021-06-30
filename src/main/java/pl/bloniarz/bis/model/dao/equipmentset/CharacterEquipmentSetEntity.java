@@ -26,55 +26,55 @@ public class CharacterEquipmentSetEntity {
     private String specialization;
 
     @ManyToOne
-    @JoinColumn(name = "character_id", unique = true)
+    @JoinColumn(name = "character_id")
     private CharacterEntity character;
 
-    @OneToOne
-    private ItemEntity head;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity head;
 
-    @OneToOne
-    private ItemEntity neck;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity neck;
 
-    @OneToOne
-    private ItemEntity shoulders;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity shoulders;
 
-    @OneToOne
-    private ItemEntity chest;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity chest;
 
-    @OneToOne
-    private ItemEntity back;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity back;
 
-    @OneToOne
-    private ItemEntity wrists;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity wrists;
 
-    @OneToOne
-    private ItemEntity hands;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity hands;
 
-    @OneToOne
-    private ItemEntity waist;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity waist;
 
-    @OneToOne
-    private ItemEntity legs;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity legs;
 
-    @OneToOne
-    private ItemEntity feet;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity feet;
 
-    @OneToOne
-    private ItemEntity firstRing;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity firstRing;
 
-    @OneToOne
-    private ItemEntity secondRing;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity secondRing;
 
-    @OneToOne
-    private ItemEntity firstTrinket;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity firstTrinket;
 
-    @OneToOne
-    private ItemEntity secondTrinket;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity secondTrinket;
 
-    @OneToOne
-    private ItemEntity mainHand;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity mainHand;
 
-    @OneToOne
-    private ItemEntity offHand;
+    @OneToOne(orphanRemoval = true)
+    private ItemSetEntity offHand;
 
 }

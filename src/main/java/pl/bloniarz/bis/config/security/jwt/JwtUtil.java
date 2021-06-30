@@ -51,6 +51,10 @@ public class JwtUtil {
         return token;
     }
 
+    public String extractNameFromCookies(Cookie[] cookies){
+        return extractUserName(extractTokenFromCookies(cookies));
+    }
+
     public String extractTokenFromCookies(Cookie[] cookies){
         Cookie cookie = Arrays.stream(cookies)
                 .filter(c -> "authorization".equals(c.getName()))

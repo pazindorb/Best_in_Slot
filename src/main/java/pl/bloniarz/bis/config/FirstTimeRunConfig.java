@@ -45,7 +45,8 @@ public class FirstTimeRunConfig implements CommandLineRunner {
     private void populateDatabaseWithWowheadItems() {
         for (LootSource value : LootSource.values()) {
             List<WowheadItemResponse> list = wowheadHttpClient.getItemsListForLootSource(value);
-            itemService.addAllItemsToDatabase(list);
+            itemService.addAllItemsToDatabase(Collections.singletonList(list.get(0)));
+            //itemService.addAllItemsToDatabase(list);
             System.out.println(value.getSourceName() + " : Added");
         }
     }
