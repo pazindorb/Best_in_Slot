@@ -6,18 +6,24 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.bloniarz.bis.model.dao.character.CharacterEntity;
 import pl.bloniarz.bis.model.dao.equipmentset.CharacterEquipmentSetEntity;
 import pl.bloniarz.bis.model.dao.equipmentset.ItemSetEntity;
+import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
+import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.request.equipmentset.CharacterEquipmentSetRequest;
 import pl.bloniarz.bis.model.dto.request.equipmentset.ItemSetRequest;
+import pl.bloniarz.bis.model.dto.response.ItemResponse;
+import pl.bloniarz.bis.model.dto.response.ItemSetResponse;
 import pl.bloniarz.bis.repository.CharacterEquipmentSetRepository;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.ItemSetRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +62,7 @@ public class CharacterEquipmentSetService {
         items.forEach(item -> {
             ItemSetEntity itemSet = ItemSetEntity.builder()
                     .item(itemRepository.getById(item.getItemId()))
-                    .socket(false)
+                    .socket(0)
                     .itemLevel(item.getItemLevel())
                     .build();
 
@@ -115,5 +121,100 @@ public class CharacterEquipmentSetService {
                     throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
             }
         });
+    }
+
+    @Transactional
+    public ItemSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
+        CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
+                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
+        CharacterEquipmentSetEntity setEntity = setRepository.findByIdAndCharacter(id, characterEntity)
+                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
+
+        List<ItemResponse> itemResponses = new LinkedList<>();
+
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getHead(), "head"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getNeck(), "neck"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getShoulders(), "shoulders"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getChest(), "chest"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getBack(), "back"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getWrists(), "wrists"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getHands(), "hands"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getWaist(), "waist"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getLegs(), "legs"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getFeet(), "feet"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getFirstRing(), "firstRing"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getSecondRing(), "secondRing"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getFirstTrinket(), "firstTrinket"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getSecondTrinket(), "secondTrinket"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getMainHand(), "mainHand"));
+        itemResponses.add(parseItemSetEntityToItem(setEntity.getOffHand(), "offHand"));
+
+        return ItemSetResponse.builder()
+                .characterName(character)
+                .name(setEntity.getName())
+                .specialization(setEntity.getSpecialization())
+                .itemList(itemResponses)
+                .build();
+
+    }
+
+    private ItemResponse parseItemSetEntityToItem(ItemSetEntity entity, String slotName) {
+        if(entity == null) return ItemResponse.builder().slot(slotName).build();
+        ItemTypes type = entity.getItem().getType();
+        ItemResponse itemResponse = ItemResponse.builder()
+                .slot(slotName)
+                .name(entity.getItem().getName())
+                .itemLevel(entity.getItemLevel())
+                .socket(entity.getSocket())
+                .dropInstance(entity.getItem().getDropInstance())
+                .wowheadLink(entity.getItem().getWowheadLink())
+                .type(type)
+                .build();
+
+        List<StatsEquationEntity> equations = entity.getItem().getStats();
+
+        StatsEquationEntity stamina = StatsEquationEntity.builder().build();
+        StatsEquationEntity secondaryStat = StatsEquationEntity.builder().build();
+        StatsEquationEntity mainStat = StatsEquationEntity.builder().build();
+        StatsEquationEntity mainStatInt = StatsEquationEntity.builder().name("none").build();
+        for (StatsEquationEntity equation: equations) {
+            if(equation.getName().contains("STAMINA"))
+                stamina = equation;
+            if(equation.getName().contains("SECONDARY"))
+                secondaryStat = equation;
+            if(equation.getName().contains("MAIN"))
+                mainStat = equation;
+            if(equation.getName().contains("MAIN_INT"))
+                mainStatInt = equation;
+        }
+        if(mainStatInt.getName().equals("none"))
+            mainStatInt = mainStat;
+
+        itemResponse.setStamina(
+                (int)(entity.getItem().getStamina() * stamina.calculate(entity.getItemLevel()))
+        );
+        int secondary = (int)(entity.getItem().getSecondary() * secondaryStat.calculate(entity.getItemLevel()));
+        itemResponse.setCriticalStrike(
+                (int)(entity.getItem().getCriticalStrike() * secondary)
+        );
+        itemResponse.setHaste(
+                (int)(entity.getItem().getHaste() * secondary)
+        );
+        itemResponse.setMastery(
+                (int)(entity.getItem().getMastery() * secondary)
+        );
+        itemResponse.setVersatility(
+                (int)(entity.getItem().getVersatility() * secondary)
+        );
+        itemResponse.setStrength(
+                (int)(entity.getItem().getStrength() * mainStat.calculate(entity.getItemLevel()))
+        );
+        itemResponse.setAgility(
+                (int)(entity.getItem().getAgility() * mainStat.calculate(entity.getItemLevel()))
+        );
+        itemResponse.setIntelligence(
+                (int)(entity.getItem().getIntelligence() * mainStatInt.calculate(entity.getItemLevel()))
+        );
+        return itemResponse;
     }
 }

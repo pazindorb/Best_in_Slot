@@ -13,5 +13,4 @@ public interface CharacterEquipmentSetRepository extends JpaRepository<Character
 
     Optional<CharacterEquipmentSetEntity> findByIdAndCharacter(long id, CharacterEntity characterEntity);
 
-    //void update(CharacterEquipmentSetEntity setEntity);
 }

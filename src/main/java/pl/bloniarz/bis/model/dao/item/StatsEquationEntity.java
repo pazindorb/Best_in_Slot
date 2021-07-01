@@ -32,4 +32,8 @@ public class StatsEquationEntity {
     @ManyToMany(mappedBy = "stats")
     private List<ItemEntity> item;
 
+    public long calculate(double ilvl){
+        return Math.round(Math.pow(ilvl,3) * x3 + Math.pow(ilvl,2) * x2 + Math.pow(ilvl,1) * x1 + Math.pow(ilvl,0) * x0);
+    }
+
 }

@@ -26,5 +26,5 @@ public class ItemSetEntity {
     private ItemEntity item;
 
     private int itemLevel;
-    private boolean socket;
+    private int socket;
 }
