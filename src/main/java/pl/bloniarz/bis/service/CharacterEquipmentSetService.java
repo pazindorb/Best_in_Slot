@@ -33,6 +33,7 @@ public class CharacterEquipmentSetService {
     private final CharacterEquipmentSetRepository setRepository;
     private final ItemRepository itemRepository;
     private final ItemSetRepository itemSetRepository;
+    private final ItemUtil itemUtil;
 
     public void addEquipmentSet(String character, String activeUser, CharacterEquipmentSetRequest set) {
         CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
@@ -160,61 +161,6 @@ public class CharacterEquipmentSetService {
 
     private ItemResponse parseItemSetEntityToItem(ItemSetEntity entity, String slotName) {
         if(entity == null) return ItemResponse.builder().slot(slotName).build();
-        ItemTypes type = entity.getItem().getType();
-        ItemResponse itemResponse = ItemResponse.builder()
-                .slot(slotName)
-                .name(entity.getItem().getName())
-                .itemLevel(entity.getItemLevel())
-                .socket(entity.getSocket())
-                .dropInstance(entity.getItem().getDropInstance())
-                .wowheadLink(entity.getItem().getWowheadLink())
-                .type(type)
-                .build();
-
-        List<StatsEquationEntity> equations = entity.getItem().getStats();
-
-        StatsEquationEntity stamina = StatsEquationEntity.builder().build();
-        StatsEquationEntity secondaryStat = StatsEquationEntity.builder().build();
-        StatsEquationEntity mainStat = StatsEquationEntity.builder().build();
-        StatsEquationEntity mainStatInt = StatsEquationEntity.builder().name("none").build();
-        for (StatsEquationEntity equation: equations) {
-            if(equation.getName().contains("STAMINA"))
-                stamina = equation;
-            if(equation.getName().contains("SECONDARY"))
-                secondaryStat = equation;
-            if(equation.getName().contains("MAIN"))
-                mainStat = equation;
-            if(equation.getName().contains("MAIN_INT"))
-                mainStatInt = equation;
-        }
-        if(mainStatInt.getName().equals("none"))
-            mainStatInt = mainStat;
-
-        itemResponse.setStamina(
-                (int)(entity.getItem().getStamina() * stamina.calculate(entity.getItemLevel()))
-        );
-        int secondary = (int)(entity.getItem().getSecondary() * secondaryStat.calculate(entity.getItemLevel()));
-        itemResponse.setCriticalStrike(
-                (int)(entity.getItem().getCriticalStrike() * secondary)
-        );
-        itemResponse.setHaste(
-                (int)(entity.getItem().getHaste() * secondary)
-        );
-        itemResponse.setMastery(
-                (int)(entity.getItem().getMastery() * secondary)
-        );
-        itemResponse.setVersatility(
-                (int)(entity.getItem().getVersatility() * secondary)
-        );
-        itemResponse.setStrength(
-                (int)(entity.getItem().getStrength() * mainStat.calculate(entity.getItemLevel()))
-        );
-        itemResponse.setAgility(
-                (int)(entity.getItem().getAgility() * mainStat.calculate(entity.getItemLevel()))
-        );
-        itemResponse.setIntelligence(
-                (int)(entity.getItem().getIntelligence() * mainStatInt.calculate(entity.getItemLevel()))
-        );
-        return itemResponse;
+        return itemUtil.parseItemEntityToItem(entity.getItem(),entity.getItemLevel(),entity.getSocket(),slotName);
     }
 }

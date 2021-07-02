@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bloniarz.bis.externalapi.model.WowheadItemResponse;
+import pl.bloniarz.bis.model.dao.equipmentset.ItemSetEntity;
 import pl.bloniarz.bis.model.dao.item.ItemEntity;
 import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.item.enums.ItemSlots;
 import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
+import pl.bloniarz.bis.model.dto.response.ItemResponse;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.StatsEquationRepository;
 
@@ -23,12 +27,12 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final StatsEquationRepository statsEquationRepository;
+    private final ItemUtil itemUtil;
 
     @Transactional
     public void addAllItemsToDatabase(List<WowheadItemResponse> wowheadItemResponseList){
         itemRepository.saveAll(parseWowheadItemResponseListToItemEntityList(wowheadItemResponseList));
     }
-
     private List<ItemEntity> parseWowheadItemResponseListToItemEntityList(List<WowheadItemResponse> wowheadItemResponseList){
         List<StatsEquationEntity> statsEquationEntities = statsEquationRepository.findAll();
         Map<String, StatsEquationEntity> equationsMap = new HashMap<>();
@@ -83,7 +87,6 @@ public class ItemService {
                 .collect(Collectors.toList());
         return entities;
     }
-
     private List<StatsEquationEntity> findStatsEquationsDependingOnSlot(ItemSlots slot, Map<String,StatsEquationEntity> map) {
         List<StatsEquationEntity> retList = new LinkedList<>();
 
@@ -165,5 +168,19 @@ public class ItemService {
         return retList;
     }
 
+    @Transactional
+    public List<ItemResponse> getItemsForSlot(ItemSlots slot, int itemLevel) {
+        List <ItemEntity> itemEntityList = itemRepository.findBySlotAndOldIsFalse(slot);
+        if(itemEntityList.isEmpty())
+            throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
 
+        return itemEntityList.stream()
+                .map(item -> itemUtil.parseItemEntityToItem(item, itemLevel, 0, slot.toString()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void setAllItemsFromDropInstanceToOld(String dropZone) {
+
+    }
 }
