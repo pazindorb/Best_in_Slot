@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.bloniarz.bis.config.security.jwt.JwtUtil;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.request.equipmentset.CharacterEquipmentSetRequest;
 import pl.bloniarz.bis.model.dto.request.equipmentset.ItemSetRequest;
 import pl.bloniarz.bis.model.dto.response.ItemSetResponse;
@@ -48,14 +50,9 @@ public class CharacterEquipmentSetController {
     }
 
     @GetMapping("/{id}")
-    public ItemSetResponse getAllItemsFromSet(@PathVariable String character, @PathVariable long id, HttpServletRequest request){
+    public ItemSetResponse getAllItemsFromSet(@PathVariable String character, @PathVariable long id, HttpServletRequest request) throws InvocationTargetException, IllegalAccessException {
         String activeUser = jwtUtil.extractNameFromCookies(request.getCookies());
-        try {
-            return characterEquipmentSetService.getAllItemsFromSet(id,character,activeUser);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return characterEquipmentSetService.getAllItemsFromSet(id,character,activeUser);
     }
 
 }

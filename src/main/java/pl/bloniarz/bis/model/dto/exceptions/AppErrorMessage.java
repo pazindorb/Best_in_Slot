@@ -19,6 +19,7 @@ public enum AppErrorMessage {
     CHARACTER_ALREADY_EXISTS("Character with this name already exists.", 409),
     SET_NOT_FOUND("Character have no such set.", 404),
     SLOT_NOT_FOUND("Slot not found.", 404),
+    ITEM_NOT_FOUND("Item not found.", 404),
 
     ;
     private final String message;

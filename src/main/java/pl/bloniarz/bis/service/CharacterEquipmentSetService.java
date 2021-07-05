@@ -91,7 +91,7 @@ public class CharacterEquipmentSetService {
                     setEntity.setHands(itemSet);
                     break;
                 case "waist":
-                    setEntity.setWrists(itemSet);
+                    setEntity.setWaist(itemSet);
                     break;
                 case "legs":
                     setEntity.setLegs(itemSet);
@@ -127,7 +127,9 @@ public class CharacterEquipmentSetService {
     @Transactional
     public ItemSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
         CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
-                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
+                .orElse(characterRepository.findByName(character)
+                        .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND)));
+
         CharacterEquipmentSetEntity setEntity = setRepository.findByIdAndCharacter(id, characterEntity)
                 .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
 
@@ -156,7 +158,6 @@ public class CharacterEquipmentSetService {
                 .specialization(setEntity.getSpecialization())
                 .itemList(itemResponses)
                 .build();
-
     }
 
     private ItemResponse parseItemSetEntityToItem(ItemSetEntity entity, String slotName) {

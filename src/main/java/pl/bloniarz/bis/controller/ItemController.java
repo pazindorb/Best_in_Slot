@@ -17,16 +17,6 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    @GetMapping("/adminonly")
-    public String helloAdmin(){
-        return "HELLO ADMIN!";
-    }
-
-    @GetMapping("/user")
-    public String hello(){
-        return "HELLO USER!";
-    }
-
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<ItemResponse> getItemsForSlot(@RequestParam String slot, @RequestParam int ilvl){
@@ -38,6 +28,13 @@ public class ItemController {
     public SimpleMessageResponse setAllItemsFromDropInstanceToOld(@RequestParam String dropZone){
         itemService.setAllItemsFromDropInstanceToOld(dropZone);
         return new SimpleMessageResponse("All items from " + dropZone + " changed to old.");
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping("/{id}")
+    public SimpleMessageResponse setItemWithSpecificIdToOld(@PathVariable long id){
+        itemService.setItemWithSpecificIdToOld(id);
+        return new SimpleMessageResponse("Items with id: " + id + " changed to old.");
     }
 
 }

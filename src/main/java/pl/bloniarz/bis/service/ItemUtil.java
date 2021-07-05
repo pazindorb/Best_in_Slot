@@ -33,7 +33,7 @@ public class ItemUtil {
                 stamina = equation;
             if(equation.getName().contains("SECONDARY"))
                 secondaryStat = equation;
-            if(equation.getName().contains("MAIN"))
+            if(equation.getName().contains("MAIN") && !(equation.getName().contains("MAIN_INT")))
                 mainStat = equation;
             if(equation.getName().contains("MAIN_INT"))
                 mainStatInt = equation;

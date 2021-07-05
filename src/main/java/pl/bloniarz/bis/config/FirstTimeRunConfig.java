@@ -37,16 +37,15 @@ public class FirstTimeRunConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        populateAuthoritiesAndCreateAdmin();
-        populateDatabaseWithStatsEquations();
-        populateDatabaseWithWowheadItems();
+        //populateAuthoritiesAndCreateAdmin();
+        //populateDatabaseWithStatsEquations();
+        //populateDatabaseWithWowheadItems();
     }
 
     private void populateDatabaseWithWowheadItems() {
         for (LootSource value : LootSource.values()) {
             List<WowheadItemResponse> list = wowheadHttpClient.getItemsListForLootSource(value);
-            itemService.addAllItemsToDatabase(Collections.singletonList(list.get(0)));
-            //itemService.addAllItemsToDatabase(list);
+            itemService.addAllItemsToDatabase(list);
             System.out.println(value.getSourceName() + " : Added");
         }
     }

@@ -31,17 +31,22 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String token = jwtUtil.extractTokenFromCookies(request.getCookies());
+        String token = "";
+        try{
+            token = jwtUtil.extractTokenFromCookies(request.getCookies());
+        } catch (Exception e){
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Token not found");
+        }
         String username = jwtUtil.extractUserName(token);
 
         if (username == null)
-            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Could not extract username from token.");
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Could not extract username from token");
         if(SecurityContextHolder.getContext().getAuthentication() != null)
-            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "SecurityContextHolder.getContext().getAuthentication() != null.");
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "SecurityContextHolder.getContext().getAuthentication() != null");
         UserDetails userDetails = detailsService.loadUserByUsername(username);
 
         if (!jwtUtil.validateToken(token, userDetails))
-            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Token cannot be validated.");
+            throw new AppException(AppErrorMessage.VERIFICATION_FAILED, "Token cannot be validated");
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());

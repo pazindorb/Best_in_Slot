@@ -20,8 +20,14 @@ public class CharacterController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public AllUsersCharactersResponse getAllCharactersForUser(HttpServletRequest request){
+    public AllUsersCharactersResponse getAllCharactersForActiveUser(HttpServletRequest request){
         return characterService.getAllCharactersForUser(request.getCookies());
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{username}")
+    public AllUsersCharactersResponse getAllCharactersForUsername(@PathVariable String username){
+        return characterService.getAllCharactersForUser(username);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

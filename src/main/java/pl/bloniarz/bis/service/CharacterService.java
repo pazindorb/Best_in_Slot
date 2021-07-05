@@ -27,14 +27,11 @@ public class CharacterService {
 
     public AllUsersCharactersResponse getAllCharactersForUser(Cookie[] cookies) {
         String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
-        return new AllUsersCharactersResponse(characterRepository.findAllCharactersOfUserNamed(activeUser).stream()
-                .map(character -> Character.builder()
-                        .name(character.getName())
-                        .characterClass(character.getCharacterClass().toString())
-                        .numberOfSets(character.getCharacterEquipmentSets().size())
-                        .build())
-                .collect(Collectors.toList()));
+        return getUsersCharactersFromUsername(activeUser);
+    }
 
+    public AllUsersCharactersResponse getAllCharactersForUser(String username) {
+        return getUsersCharactersFromUsername(username);
     }
 
     public String addCharacter(Character character, Cookie[] cookies) {
@@ -52,7 +49,6 @@ public class CharacterService {
         catch (Exception e){
             throw new AppException(AppErrorMessage.CHARACTER_ALREADY_EXISTS);
         }
-
         return activeUser;
     }
 
@@ -66,4 +62,13 @@ public class CharacterService {
         return characterEntity.getName();
     }
 
+    private AllUsersCharactersResponse getUsersCharactersFromUsername(String username) {
+        return new AllUsersCharactersResponse(characterRepository.findAllCharactersOfUserNamed(username).stream()
+                .map(character -> Character.builder()
+                        .name(character.getName())
+                        .characterClass(character.getCharacterClass().toString())
+                        .numberOfSets(character.getCharacterEquipmentSets().size())
+                        .build())
+                .collect(Collectors.toList()));
+    }
 }

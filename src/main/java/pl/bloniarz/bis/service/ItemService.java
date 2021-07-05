@@ -162,7 +162,7 @@ public class ItemService {
         else if(shield){
             retList.add(map.get("STAMINA_OH"));
             retList.add(map.get("MAIN_OH"));
-            retList.add(map.get("MAIN_INT_OH"));
+            retList.add(map.get("MAIN_INT_OFF"));
             retList.add(map.get("SECONDARY_OH"));
         }
         return retList;
@@ -180,7 +180,19 @@ public class ItemService {
     }
 
     @Transactional
-    public void setAllItemsFromDropInstanceToOld(String dropZone) {
+    public void setAllItemsFromDropInstanceToOld(String dropInstance) {
+        List<ItemEntity> items = itemRepository.findByDropInstance(dropInstance);
+        if(items.isEmpty())
+            throw new AppException(AppErrorMessage.ITEM_NOT_FOUND);
+        items = items.stream()
+                .peek(itemEntity -> itemEntity.setOld(true))
+                .collect(Collectors.toList());
+    }
 
+    @Transactional
+    public void setItemWithSpecificIdToOld(long id) {
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new AppException(AppErrorMessage.ITEM_NOT_FOUND));
+        item.setOld(true);
     }
 }

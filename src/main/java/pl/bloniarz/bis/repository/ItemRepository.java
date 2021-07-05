@@ -13,4 +13,6 @@ public interface ItemRepository extends JpaRepository<ItemEntity,Long> {
 
     List<ItemEntity> findBySlotAndOldIsFalse(ItemSlots slot);
 
+    List<ItemEntity> findByDropInstance(String dropInstance);
+
 }

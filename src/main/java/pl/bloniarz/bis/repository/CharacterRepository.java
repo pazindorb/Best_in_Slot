@@ -30,4 +30,6 @@ public interface CharacterRepository extends JpaRepository<CharacterEntity, Long
             ") AND name = ?2", nativeQuery = true)
     Optional<CharacterEntity> findOneByUsernameAndCharacterName(String username, String characterName);
 
+    Optional<CharacterEntity> findByName(String name);
+
 }
