@@ -27,32 +27,33 @@ public class CharacterService {
 
     public AllUsersCharactersResponse getAllCharactersForUser(Cookie[] cookies) {
         String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
-        return new AllUsersCharactersResponse(characterRepository.findAllCharactersOfUserNamed(activeUser).stream()
-                .map(character -> Character.builder()
-                        .name(character.getName())
-                        .characterClass(character.getCharacterClass().toString())
-                        .numberOfSets(character.getCharacterEquipmentSets().size())
-                        .build())
-                .collect(Collectors.toList()));
+        return getUsersCharactersFromUsername(activeUser);
+    }
 
+    public AllUsersCharactersResponse getAllCharactersForUser(String username) {
+        return getUsersCharactersFromUsername(username);
     }
 
     public String addCharacter(Character character, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
+        String activeUser = jwtUtil.extractNameFromCookies(cookies);
         UserEntity userEntity = userRepository.findByLogin(activeUser)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, activeUser));
-
-        characterRepository.save(CharacterEntity.builder()
-                .user(userEntity)
-                .name(character.getName())
-                .characterClass(CharacterClasses.valueOf(character.getCharacterClass()))
-                .characterEquipmentSets(new ArrayList<>())
-                .build());
+        try{
+            characterRepository.save(CharacterEntity.builder()
+                    .user(userEntity)
+                    .name(character.getName())
+                    .characterClass(CharacterClasses.valueOf(character.getCharacterClass()))
+                    .characterEquipmentSets(new ArrayList<>())
+                    .build());
+        }
+        catch (Exception e){
+            throw new AppException(AppErrorMessage.CHARACTER_ALREADY_EXISTS);
+        }
         return activeUser;
     }
 
     public String deleteCharacter(long id, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
+        String activeUser = jwtUtil.extractNameFromCookies(cookies);
 
         CharacterEntity characterEntity = characterRepository.findById(id)
                 .filter(character -> character.getUser().getLogin().equals(activeUser))
@@ -61,4 +62,13 @@ public class CharacterService {
         return characterEntity.getName();
     }
 
+    private AllUsersCharactersResponse getUsersCharactersFromUsername(String username) {
+        return new AllUsersCharactersResponse(characterRepository.findAllCharactersOfUserNamed(username).stream()
+                .map(character -> Character.builder()
+                        .name(character.getName())
+                        .characterClass(character.getCharacterClass().toString())
+                        .numberOfSets(character.getCharacterEquipmentSets().size())
+                        .build())
+                .collect(Collectors.toList()));
+    }
 }

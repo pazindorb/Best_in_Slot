@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -30,6 +32,11 @@ public class StatsEquationEntity {
     private double x3;
 
     @ManyToMany(mappedBy = "stats")
+    @NotFound(action = NotFoundAction.IGNORE)
     private List<ItemEntity> item;
+
+    public long calculate(double ilvl){
+        return Math.round(Math.pow(ilvl,3) * x3 + Math.pow(ilvl,2) * x2 + Math.pow(ilvl,1) * x1 + Math.pow(ilvl,0) * x0);
+    }
 
 }

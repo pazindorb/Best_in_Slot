@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -36,8 +37,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET,"/api/items/adminonly").hasRole("ADMIN")
-                .antMatchers(HttpMethod.GET,"/api/items/user").hasAnyRole("ADMIN","USER")
+                .antMatchers(HttpMethod.POST, "api/users").permitAll()
+                .antMatchers(HttpMethod.POST, "api/users/login").permitAll()
+                .antMatchers(HttpMethod.POST, "api/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "api/**").authenticated()
+                .antMatchers(HttpMethod.PATCH, "api/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "api/").authenticated()
+                .antMatchers(HttpMethod.PATCH, "/api/items/**").hasRole("ADMIN")
                 .anyRequest().permitAll();
 
         http

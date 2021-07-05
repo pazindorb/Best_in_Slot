@@ -37,9 +37,9 @@ public class FirstTimeRunConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        populateAuthoritiesAndCreateAdmin();
-        populateDatabaseWithStatsEquations();
-        populateDatabaseWithWowheadItems();
+        //populateAuthoritiesAndCreateAdmin();
+        //populateDatabaseWithStatsEquations();
+        //populateDatabaseWithWowheadItems();
     }
 
     private void populateDatabaseWithWowheadItems() {
