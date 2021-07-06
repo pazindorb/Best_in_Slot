@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto;
+package pl.bloniarz.bis.model.dto.character;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

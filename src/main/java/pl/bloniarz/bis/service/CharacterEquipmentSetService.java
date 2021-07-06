@@ -4,14 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bloniarz.bis.model.dao.character.CharacterEntity;
-import pl.bloniarz.bis.model.dao.equipmentset.CharacterEquipmentSetEntity;
+import pl.bloniarz.bis.model.dao.equipmentset.EquipmentEntity;
 import pl.bloniarz.bis.model.dao.equipmentset.ItemSetEntity;
-import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
-import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.request.equipmentset.CharacterEquipmentSetRequest;
-import pl.bloniarz.bis.model.dto.request.equipmentset.ItemSetRequest;
+import pl.bloniarz.bis.model.dto.request.equipment.EquipmentRequest;
+import pl.bloniarz.bis.model.dto.request.equipment.ItemSetRequest;
 import pl.bloniarz.bis.model.dto.response.ItemResponse;
 import pl.bloniarz.bis.model.dto.response.ItemSetResponse;
 import pl.bloniarz.bis.repository.CharacterEquipmentSetRepository;
@@ -20,10 +18,7 @@ import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.ItemSetRepository;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +28,11 @@ public class CharacterEquipmentSetService {
     private final CharacterEquipmentSetRepository setRepository;
     private final ItemRepository itemRepository;
     private final ItemSetRepository itemSetRepository;
-    private final ItemUtil itemUtil;
+    private final ServicesUtil servicesUtil;
 
-    public void addEquipmentSet(String character, String activeUser, CharacterEquipmentSetRequest set) {
-        CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
-                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
-        CharacterEquipmentSetEntity setEntity = CharacterEquipmentSetEntity.builder()
+    public void addEquipmentSet(String character, String activeUser, EquipmentRequest set) {
+        CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
+        EquipmentEntity setEntity = EquipmentEntity.builder()
                 .name(set.getName())
                 .specialization(set.getSpecialization())
                 .character(characterEntity)
@@ -47,19 +41,15 @@ public class CharacterEquipmentSetService {
     }
 
     public void deleteEquipmentSet(String character, long id, String activeUser) {
-        CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
-                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
-        CharacterEquipmentSetEntity setEntity = setRepository.findByIdAndCharacter(id, characterEntity)
-                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
+        CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
+        EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
         setRepository.delete(setEntity);
     }
 
     @Transactional
     public void changeItemsInSet(long id, String character, String activeUser, List<ItemSetRequest> items) {
-        CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
-                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
-        CharacterEquipmentSetEntity setEntity = setRepository.findByIdAndCharacter(id, characterEntity)
-                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
+        CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
+        EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
         items.forEach(item -> {
             ItemSetEntity itemSet = ItemSetEntity.builder()
                     .item(itemRepository.getById(item.getItemId()))
@@ -126,12 +116,11 @@ public class CharacterEquipmentSetService {
 
     @Transactional
     public ItemSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
-        CharacterEntity characterEntity = characterRepository.findOneByUsernameAndCharacterName(activeUser, character)
+        CharacterEntity characterEntity = characterRepository.findByUsernameAndCharacterName(activeUser, character)
                 .orElse(characterRepository.findByName(character)
                         .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND)));
 
-        CharacterEquipmentSetEntity setEntity = setRepository.findByIdAndCharacter(id, characterEntity)
-                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
+        EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
 
         List<ItemResponse> itemResponses = new LinkedList<>();
 
@@ -162,6 +151,8 @@ public class CharacterEquipmentSetService {
 
     private ItemResponse parseItemSetEntityToItem(ItemSetEntity entity, String slotName) {
         if(entity == null) return ItemResponse.builder().slot(slotName).build();
-        return itemUtil.parseItemEntityToItem(entity.getItem(),entity.getItemLevel(),entity.getSocket(),slotName);
+        return servicesUtil.parseItemEntityToItem(entity.getItem(),entity.getItemLevel(),entity.getSocket(),slotName);
     }
+
+
 }

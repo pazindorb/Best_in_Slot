@@ -14,12 +14,12 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "CHARACTER_EQUIPMENT_SETS")
-public class CharacterEquipmentSetEntity {
+@Table(name = "EQUIPMENT")
+public class EquipmentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "set_id")
+    @Column(name = "equipment_id")
     private long id;
 
     private String name;

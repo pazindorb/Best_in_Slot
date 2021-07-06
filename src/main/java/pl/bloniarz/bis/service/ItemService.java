@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bloniarz.bis.externalapi.model.WowheadItemResponse;
-import pl.bloniarz.bis.model.dao.equipmentset.ItemSetEntity;
 import pl.bloniarz.bis.model.dao.item.ItemEntity;
 import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.item.enums.ItemSlots;
@@ -27,7 +26,7 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final StatsEquationRepository statsEquationRepository;
-    private final ItemUtil itemUtil;
+    private final ServicesUtil itemUtil;
 
     @Transactional
     public void addAllItemsToDatabase(List<WowheadItemResponse> wowheadItemResponseList){

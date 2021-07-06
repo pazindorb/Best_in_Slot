@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dao.equipmentset.CharacterEquipmentSetEntity;
+import pl.bloniarz.bis.model.dao.equipmentset.EquipmentEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 
 import javax.persistence.*;
@@ -34,7 +34,7 @@ public class CharacterEntity {
     private CharacterClasses characterClass;
 
     @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval=true)
-    private List<CharacterEquipmentSetEntity> characterEquipmentSets;
+    private List<EquipmentEntity> characterEquipmentSets;
 
 
 

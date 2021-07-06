@@ -5,10 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.bloniarz.bis.config.security.jwt.JwtUtil;
-import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
-import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.request.equipmentset.CharacterEquipmentSetRequest;
-import pl.bloniarz.bis.model.dto.request.equipmentset.ItemSetRequest;
+import pl.bloniarz.bis.model.dto.request.equipment.EquipmentRequest;
+import pl.bloniarz.bis.model.dto.request.equipment.ItemSetRequest;
 import pl.bloniarz.bis.model.dto.response.ItemSetResponse;
 import pl.bloniarz.bis.model.dto.response.SimpleMessageResponse;
 import pl.bloniarz.bis.service.CharacterEquipmentSetService;
@@ -27,7 +25,7 @@ public class CharacterEquipmentSetController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public SimpleMessageResponse addEquipmentSet(@PathVariable String character, @RequestBody CharacterEquipmentSetRequest set, HttpServletRequest request){
+    public SimpleMessageResponse addEquipmentSet(@PathVariable String character, @RequestBody EquipmentRequest set, HttpServletRequest request){
         String activeUser = jwtUtil.extractNameFromCookies(request.getCookies());
         characterEquipmentSetService.addEquipmentSet(character, activeUser, set);
         return new SimpleMessageResponse("Set " + set.getName() + " added to: " + character);

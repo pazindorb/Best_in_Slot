@@ -1,15 +1,37 @@
 package pl.bloniarz.bis.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.bloniarz.bis.model.dao.character.CharacterEntity;
+import pl.bloniarz.bis.model.dao.equipmentset.EquipmentEntity;
 import pl.bloniarz.bis.model.dao.item.ItemEntity;
 import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
+import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
+import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.response.ItemResponse;
+import pl.bloniarz.bis.repository.CharacterEquipmentSetRepository;
+import pl.bloniarz.bis.repository.CharacterRepository;
 
 import java.util.List;
 
 @Component
-public class ItemUtil {
+@RequiredArgsConstructor
+public class ServicesUtil {
+
+    private final CharacterRepository characterRepository;
+    private final CharacterEquipmentSetRepository characterEquipmentSetRepository;
+
+    public CharacterEntity getCharacterEntityFromNameAndActiveUser(String character, String activeUser) {
+        return characterRepository.findByUsernameAndCharacterName(activeUser, character)
+                .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND, character));
+    }
+
+    public EquipmentEntity getSetEntityFromCharacterEntityAndSetId(long id, CharacterEntity characterEntity) {
+        return characterEquipmentSetRepository.findByIdAndCharacter(id, characterEntity)
+                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
+    }
+
     public ItemResponse parseItemEntityToItem(ItemEntity item, int itemLevel, int socket, String slotName) {
         ItemTypes type = item.getType();
         ItemResponse itemResponse = ItemResponse.builder()

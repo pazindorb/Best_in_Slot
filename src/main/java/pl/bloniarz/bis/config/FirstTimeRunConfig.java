@@ -18,11 +18,8 @@ import pl.bloniarz.bis.service.ItemService;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -37,17 +34,88 @@ public class FirstTimeRunConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //populateAuthoritiesAndCreateAdmin();
-        //populateDatabaseWithStatsEquations();
-        //populateDatabaseWithWowheadItems();
+//        populateAuthoritiesAndCreateAdmin();
+//        populateDatabaseWithStatsEquations();
+//        populateDatabaseWithWowheadItems();
     }
 
     private void populateDatabaseWithWowheadItems() {
-        for (LootSource value : LootSource.values()) {
-            List<WowheadItemResponse> list = wowheadHttpClient.getItemsListForLootSource(value);
-            itemService.addAllItemsToDatabase(list);
-            System.out.println(value.getSourceName() + " : Added");
-        }
+        List<LootSource> lootSourceList = new LinkedList<>();
+        lootSourceList.add(LootSource.builder()
+                .sourceName("De Other Side")
+                .searchRequirements("220:195;13309:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Halls of Atonement")
+                .searchRequirements("220:195;12831:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Mists of Trina Scithe")
+                .searchRequirements("220:195;13334:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Plaguefall")
+                .searchRequirements("220:195;13228:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Sanguine Depths")
+                .searchRequirements("220:195;12842:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Spires of Ascension")
+                .searchRequirements("220:195;12837:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("The Necrotic Wake")
+                .searchRequirements("220:195;12916:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Theater of Pain")
+                .searchRequirements("220:195;12841:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Castle Nathria")
+                .searchRequirements("212:195;13224:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(200)
+                .maxIlvl(207)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("PvP")
+                .searchRequirements("129:195;0:1;168011:0")
+                .expansion("Shadowlands")
+                .minIlvl(200)
+                .maxIlvl(200)
+                .build());
+
+        lootSourceList.forEach(value -> {
+            itemService.addAllItemsToDatabase(wowheadHttpClient.getItemsListForLootSource(value));
+            System.out.println(value.getSourceName() + " : Added to database");
+        });
     }
 
     private void populateDatabaseWithStatsEquations() throws ParseException {

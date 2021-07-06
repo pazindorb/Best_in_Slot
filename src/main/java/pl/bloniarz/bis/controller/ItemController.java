@@ -3,6 +3,8 @@ package pl.bloniarz.bis.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pl.bloniarz.bis.externalapi.WowheadHttpClient;
+import pl.bloniarz.bis.externalapi.model.LootSource;
 import pl.bloniarz.bis.model.dao.item.enums.ItemSlots;
 import pl.bloniarz.bis.model.dto.response.ItemResponse;
 import pl.bloniarz.bis.model.dto.response.SimpleMessageResponse;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final WowheadHttpClient wowheadHttpClient;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
@@ -35,6 +38,13 @@ public class ItemController {
     public SimpleMessageResponse setItemWithSpecificIdToOld(@PathVariable long id){
         itemService.setItemWithSpecificIdToOld(id);
         return new SimpleMessageResponse("Items with id: " + id + " changed to old.");
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
+    public SimpleMessageResponse addItemsFromWowheadToDatabase(@RequestBody LootSource lootSource){
+        itemService.addAllItemsToDatabase(wowheadHttpClient.getItemsListForLootSource(lootSource));
+        return new SimpleMessageResponse(lootSource.getSourceName() + " : Added to database");
     }
 
 }

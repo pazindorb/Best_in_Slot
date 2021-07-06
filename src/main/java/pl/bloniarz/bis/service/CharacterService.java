@@ -2,18 +2,16 @@ package pl.bloniarz.bis.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.bloniarz.bis.config.security.jwt.JwtUtil;
 import pl.bloniarz.bis.model.dao.character.CharacterClasses;
 import pl.bloniarz.bis.model.dao.character.CharacterEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.response.AllUsersCharactersResponse;
-import pl.bloniarz.bis.model.dto.Character;
+import pl.bloniarz.bis.model.dto.response.UsersCharactersResponse;
+import pl.bloniarz.bis.model.dto.character.Character;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.UserRepository;
 
-import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -23,21 +21,14 @@ public class CharacterService {
 
     private final CharacterRepository characterRepository;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
-    public AllUsersCharactersResponse getAllCharactersForUser(Cookie[] cookies) {
-        String activeUser = jwtUtil.extractUserName(jwtUtil.extractTokenFromCookies(cookies));
-        return getUsersCharactersFromUsername(activeUser);
-    }
-
-    public AllUsersCharactersResponse getAllCharactersForUser(String username) {
+    public UsersCharactersResponse getAllCharactersForUser(String username) {
         return getUsersCharactersFromUsername(username);
     }
 
-    public String addCharacter(Character character, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractNameFromCookies(cookies);
-        UserEntity userEntity = userRepository.findByLogin(activeUser)
-                .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, activeUser));
+    public String addCharacter(Character character, String username) {
+        UserEntity userEntity = userRepository.findByLogin(username)
+                .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, username));
         try{
             characterRepository.save(CharacterEntity.builder()
                     .user(userEntity)
@@ -49,21 +40,20 @@ public class CharacterService {
         catch (Exception e){
             throw new AppException(AppErrorMessage.CHARACTER_ALREADY_EXISTS);
         }
-        return activeUser;
+        return username;
     }
 
-    public String deleteCharacter(long id, Cookie[] cookies) {
-        String activeUser = jwtUtil.extractNameFromCookies(cookies);
-
+    public String deleteCharacter(long id, String username) {
         CharacterEntity characterEntity = characterRepository.findById(id)
-                .filter(character -> character.getUser().getLogin().equals(activeUser))
+                .filter(character -> character.getUser().getLogin().equals(username))
                 .orElseThrow(() -> new AppException(AppErrorMessage.NOT_OWNER));
         characterRepository.delete(characterEntity);
         return characterEntity.getName();
     }
 
-    private AllUsersCharactersResponse getUsersCharactersFromUsername(String username) {
-        return new AllUsersCharactersResponse(characterRepository.findAllCharactersOfUserNamed(username).stream()
+    private UsersCharactersResponse getUsersCharactersFromUsername(String username) {
+        return new UsersCharactersResponse(username,
+                characterRepository.findAllCharactersOfUserNamed(username).stream()
                 .map(character -> Character.builder()
                         .name(character.getName())
                         .characterClass(character.getCharacterClass().toString())

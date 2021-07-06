@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dto.Character;
+import pl.bloniarz.bis.model.dto.character.Character;
 
 import java.util.List;
 
@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AllUsersCharactersResponse {
-    List<Character> characters;
+public class UsersCharactersResponse {
+    private String username;
+    private List<Character> characters;
 }

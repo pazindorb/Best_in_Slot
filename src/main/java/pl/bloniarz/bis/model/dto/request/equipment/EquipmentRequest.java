@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto.request.equipmentset;
+package pl.bloniarz.bis.model.dto.request.equipment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CharacterEquipmentSetRequest {
+public class EquipmentRequest {
 
     private String name;
     private String specialization;
