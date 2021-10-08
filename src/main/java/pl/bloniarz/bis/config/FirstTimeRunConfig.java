@@ -113,8 +113,7 @@ public class FirstTimeRunConfig implements CommandLineRunner {
                 .build());
 
         lootSourceList.forEach(value -> {
-            itemService.addAllItemsToDatabase(wowheadHttpClient.getItemsListForLootSource(value));
-            System.out.println(value.getSourceName() + " : Added to database");
+            itemService.addAllItemsToDatabase(wowheadHttpClient.getItemsListForLootSource(value), value.getSourceName());
         });
     }
 

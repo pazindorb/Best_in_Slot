@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto.character;
+package pl.bloniarz.bis.model.dto.response.character;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Character {
+public class CharacterResponse {
+    private long id;
     private String name;
     private String characterClass;
     private int numberOfSets;

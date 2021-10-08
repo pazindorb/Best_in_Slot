@@ -28,27 +28,20 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public SimpleMessageResponse register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
-        userService.register(userRegistrationRequest);
-        return new SimpleMessageResponse(userRegistrationRequest.getLogin() + " registered");
+    public long register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
+        return userService.register(userRegistrationRequest);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")
-    public SimpleMessageResponse login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
-        response.addCookie(userService.login(userLoginRequest));
-        return new SimpleMessageResponse("Login successful for: " + userLoginRequest.getLogin());
+    public void login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
+        userService.login(userLoginRequest, response);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/logout")
-    public SimpleMessageResponse logout(HttpServletRequest request, HttpServletResponse response){
-        Cookie cookie = Arrays.stream(request.getCookies())
-                .filter(cookies -> "authorization".equals(cookies.getName()))
-                .findAny()
-                .orElseThrow(() -> new AppException(AppErrorMessage.LOGOUT_FAILED));
-        response.addCookie(userService.logout(cookie));
-        return new SimpleMessageResponse("Logout successful");
+    public void logout(HttpServletResponse response){
+        userService.logout(response);
     }
 
 }

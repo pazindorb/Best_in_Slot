@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto.response;
+package pl.bloniarz.bis.model.dto.response.item;
 
 
 import lombok.AllArgsConstructor;
@@ -16,6 +16,8 @@ import javax.persistence.Enumerated;
 @AllArgsConstructor
 @Builder
 public class ItemResponse {
+
+    private long id;
 
     private String slot;
     private String name;

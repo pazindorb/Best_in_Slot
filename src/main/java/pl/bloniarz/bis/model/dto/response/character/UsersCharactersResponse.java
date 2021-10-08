@@ -1,10 +1,10 @@
-package pl.bloniarz.bis.model.dto.response;
+package pl.bloniarz.bis.model.dto.response.character;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dto.character.Character;
+import pl.bloniarz.bis.model.dto.response.character.CharacterResponse;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ import java.util.List;
 @Builder
 public class UsersCharactersResponse {
     private String username;
-    private List<Character> characters;
+    private List<CharacterResponse> characters;
 }

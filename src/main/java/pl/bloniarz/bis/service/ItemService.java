@@ -10,7 +10,7 @@ import pl.bloniarz.bis.model.dao.item.enums.ItemSlots;
 import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.response.ItemResponse;
+import pl.bloniarz.bis.model.dto.response.item.*;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.StatsEquationRepository;
 
@@ -26,11 +26,73 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final StatsEquationRepository statsEquationRepository;
-    private final ServicesUtil itemUtil;
+    private final ServicesUtil servicesUtil;
 
     @Transactional
-    public void addAllItemsToDatabase(List<WowheadItemResponse> wowheadItemResponseList){
-        itemRepository.saveAll(parseWowheadItemResponseListToItemEntityList(wowheadItemResponseList));
+    public AddedItemsResponse addAllItemsToDatabase(List<WowheadItemResponse> wowheadItemResponseList, String dropInstance){
+        List<ItemEntity> itemEntityList = itemRepository.saveAll(parseWowheadItemResponseListToItemEntityList(wowheadItemResponseList));
+        return AddedItemsResponse.builder()
+                .dropInstance(dropInstance)
+                .items(itemEntityList.stream()
+                        .map(this::parseItemEntityToAddedItem)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @Transactional
+    public ItemsForSlotResponse getItemsForSlot(ItemSlots slot, int itemLevel) {
+        List <ItemEntity> itemEntityList = itemRepository.findBySlotAndOldIsFalse(slot);
+        if(itemEntityList.isEmpty())
+            throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
+
+        return ItemsForSlotResponse.builder()
+                .slot(slot.toString())
+                .items(itemEntityList.stream()
+                        .map(item -> servicesUtil.parseItemEntityToItem(item, itemLevel, 0, slot.toString()))
+                        .collect(Collectors.toList()))
+                .build();
+
+    }
+
+    @Transactional
+    public OldItemCollectionResponse setAllItemsFromDropInstanceToOld(String dropInstance) {
+        List<ItemEntity> items = itemRepository.findByDropInstance(dropInstance);
+        if(items.isEmpty())
+            throw new AppException(AppErrorMessage.ITEM_NOT_FOUND);
+        items = items.stream()
+                .peek(itemEntity -> itemEntity.setOld(true))
+                .collect(Collectors.toList());
+        return OldItemCollectionResponse.builder()
+                .dropInstance(dropInstance)
+                .oldItems(items.stream()
+                        .map(this::parseItemEntityToOldItem)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @Transactional
+    public OldItemResponse setItemWithSpecificIdToOld(long id) {
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new AppException(AppErrorMessage.ITEM_NOT_FOUND));
+        item.setOld(true);
+        return parseItemEntityToOldItem(item);
+    }
+
+    private AddedItem parseItemEntityToAddedItem(ItemEntity itemEntity){
+        return AddedItem.builder()
+                .id(itemEntity.getId())
+                .name(itemEntity.getName())
+                .slot(itemEntity.getSlot().toString())
+                .type(itemEntity.getType())
+                .wowheadLink(itemEntity.getWowheadLink())
+                .build();
+    }
+    private OldItemResponse parseItemEntityToOldItem(ItemEntity itemEntity){
+        return OldItemResponse.builder()
+                .id(itemEntity.getId())
+                .name(itemEntity.getName())
+                .wowheadLink(itemEntity.getWowheadLink())
+                .build();
     }
     private List<ItemEntity> parseWowheadItemResponseListToItemEntityList(List<WowheadItemResponse> wowheadItemResponseList){
         List<StatsEquationEntity> statsEquationEntities = statsEquationRepository.findAll();
@@ -40,12 +102,8 @@ public class ItemService {
             equationsMap.put(entity.getName(), entity);
         });
 
-        List<ItemEntity> entities = wowheadItemResponseList.stream()
-                .filter(item -> {
-                    if (item.getQuality().equals("Rare") || item.getQuality().equals("Epic") || item.getQuality().equals("Legendary"))
-                        return true;
-                    return false;
-                })
+        return wowheadItemResponseList.stream()
+                .filter(item -> item.getQuality().equals("Rare") || item.getQuality().equals("Epic") || item.getQuality().equals("Legendary"))
                 .map(item -> {
                     ItemTypes type = ItemTypes.fromName(item.getType());
                     ItemSlots slot = ItemSlots.extractSlotFromWowheadItem(item);
@@ -84,7 +142,6 @@ public class ItemService {
                     return itemEntity;
                 })
                 .collect(Collectors.toList());
-        return entities;
     }
     private List<StatsEquationEntity> findStatsEquationsDependingOnSlot(ItemSlots slot, Map<String,StatsEquationEntity> map) {
         List<StatsEquationEntity> retList = new LinkedList<>();
@@ -167,31 +224,4 @@ public class ItemService {
         return retList;
     }
 
-    @Transactional
-    public List<ItemResponse> getItemsForSlot(ItemSlots slot, int itemLevel) {
-        List <ItemEntity> itemEntityList = itemRepository.findBySlotAndOldIsFalse(slot);
-        if(itemEntityList.isEmpty())
-            throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
-
-        return itemEntityList.stream()
-                .map(item -> itemUtil.parseItemEntityToItem(item, itemLevel, 0, slot.toString()))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void setAllItemsFromDropInstanceToOld(String dropInstance) {
-        List<ItemEntity> items = itemRepository.findByDropInstance(dropInstance);
-        if(items.isEmpty())
-            throw new AppException(AppErrorMessage.ITEM_NOT_FOUND);
-        items = items.stream()
-                .peek(itemEntity -> itemEntity.setOld(true))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void setItemWithSpecificIdToOld(long id) {
-        ItemEntity item = itemRepository.findById(id)
-                .orElseThrow(() -> new AppException(AppErrorMessage.ITEM_NOT_FOUND));
-        item.setOld(true);
-    }
 }

@@ -8,7 +8,7 @@ import pl.bloniarz.bis.model.dao.equipmentset.EquipmentEntity;
 import java.util.Optional;
 
 @Repository
-public interface CharacterEquipmentSetRepository extends JpaRepository<EquipmentEntity, Long> {
+public interface EquipmentSetRepository extends JpaRepository<EquipmentEntity, Long> {
 
     Optional<EquipmentEntity> findByIdAndCharacter(long id, CharacterEntity characterEntity);
 

@@ -7,8 +7,9 @@ import pl.bloniarz.bis.model.dao.character.CharacterEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.response.UsersCharactersResponse;
-import pl.bloniarz.bis.model.dto.character.Character;
+import pl.bloniarz.bis.model.dto.request.character.CharacterRequest;
+import pl.bloniarz.bis.model.dto.response.character.UsersCharactersResponse;
+import pl.bloniarz.bis.model.dto.response.character.CharacterResponse;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.UserRepository;
 
@@ -26,21 +27,22 @@ public class CharacterService {
         return getUsersCharactersFromUsername(username);
     }
 
-    public String addCharacter(Character character, String username) {
+    public CharacterResponse addCharacter(CharacterRequest characterRequest, String username) {
+        CharacterEntity characterEntity;
         UserEntity userEntity = userRepository.findByLogin(username)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, username));
         try{
-            characterRepository.save(CharacterEntity.builder()
+            characterEntity = characterRepository.save(CharacterEntity.builder()
                     .user(userEntity)
-                    .name(character.getName())
-                    .characterClass(CharacterClasses.valueOf(character.getCharacterClass()))
+                    .name(characterRequest.getName())
+                    .characterClass(CharacterClasses.valueOf(characterRequest.getCharacterClass()))
                     .characterEquipmentSets(new ArrayList<>())
                     .build());
         }
         catch (Exception e){
             throw new AppException(AppErrorMessage.CHARACTER_ALREADY_EXISTS);
         }
-        return username;
+        return parseCharacterEntityToCharacter(characterEntity);
     }
 
     public String deleteCharacter(long id, String username) {
@@ -54,11 +56,16 @@ public class CharacterService {
     private UsersCharactersResponse getUsersCharactersFromUsername(String username) {
         return new UsersCharactersResponse(username,
                 characterRepository.findAllCharactersOfUserNamed(username).stream()
-                .map(character -> Character.builder()
-                        .name(character.getName())
-                        .characterClass(character.getCharacterClass().toString())
-                        .numberOfSets(character.getCharacterEquipmentSets().size())
-                        .build())
+                .map(this::parseCharacterEntityToCharacter)
                 .collect(Collectors.toList()));
+    }
+
+    private CharacterResponse parseCharacterEntityToCharacter(CharacterEntity characterEntity){
+        return CharacterResponse.builder()
+                .id(characterEntity.getId())
+                .name(characterEntity.getName())
+                .characterClass(characterEntity.getCharacterClass().toString())
+                .numberOfSets(characterEntity.getCharacterEquipmentSets().size())
+                .build();
     }
 }

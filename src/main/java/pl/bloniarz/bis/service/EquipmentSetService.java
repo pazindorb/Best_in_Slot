@@ -10,9 +10,9 @@ import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.request.equipment.EquipmentRequest;
 import pl.bloniarz.bis.model.dto.request.equipment.ItemSetRequest;
-import pl.bloniarz.bis.model.dto.response.ItemResponse;
-import pl.bloniarz.bis.model.dto.response.ItemSetResponse;
-import pl.bloniarz.bis.repository.CharacterEquipmentSetRepository;
+import pl.bloniarz.bis.model.dto.response.item.ItemResponse;
+import pl.bloniarz.bis.model.dto.response.equipment.EquipmentSetResponse;
+import pl.bloniarz.bis.repository.EquipmentSetRepository;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.ItemSetRepository;
@@ -22,22 +22,23 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class CharacterEquipmentSetService {
+public class EquipmentSetService {
 
     private final CharacterRepository characterRepository;
-    private final CharacterEquipmentSetRepository setRepository;
+    private final EquipmentSetRepository setRepository;
     private final ItemRepository itemRepository;
     private final ItemSetRepository itemSetRepository;
     private final ServicesUtil servicesUtil;
 
-    public void addEquipmentSet(String character, String activeUser, EquipmentRequest set) {
+    public EquipmentSetResponse addEquipmentSet(String character, String activeUser, EquipmentRequest set) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
         EquipmentEntity setEntity = EquipmentEntity.builder()
                 .name(set.getName())
                 .specialization(set.getSpecialization())
                 .character(characterEntity)
                 .build();
-        setRepository.save(setEntity);
+        setEntity = setRepository.save(setEntity);
+        return parseSetEntityToEquipmentSetResponse(setEntity, character);
     }
 
     public void deleteEquipmentSet(String character, long id, String activeUser) {
@@ -47,7 +48,7 @@ public class CharacterEquipmentSetService {
     }
 
     @Transactional
-    public void changeItemsInSet(long id, String character, String activeUser, List<ItemSetRequest> items) {
+    public EquipmentSetResponse changeItemsInSet(long id, String character, String activeUser, List<ItemSetRequest> items) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
         EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
         items.forEach(item -> {
@@ -112,40 +113,46 @@ public class CharacterEquipmentSetService {
                     throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
             }
         });
+        return parseSetEntityToEquipmentSetResponse(setEntity, character);
     }
 
     @Transactional
-    public ItemSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
+    public EquipmentSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
         CharacterEntity characterEntity = characterRepository.findByUsernameAndCharacterName(activeUser, character)
                 .orElse(characterRepository.findByName(character)
                         .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND)));
 
         EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
 
-        List<ItemResponse> itemResponses = new LinkedList<>();
+        return parseSetEntityToEquipmentSetResponse(setEntity, character);
+    }
 
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getHead(), "head"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getNeck(), "neck"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getShoulders(), "shoulders"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getChest(), "chest"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getBack(), "back"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getWrists(), "wrists"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getHands(), "hands"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getWaist(), "waist"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getLegs(), "legs"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getFeet(), "feet"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getFirstRing(), "firstRing"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getSecondRing(), "secondRing"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getFirstTrinket(), "firstTrinket"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getSecondTrinket(), "secondTrinket"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getMainHand(), "mainHand"));
-        itemResponses.add(parseItemSetEntityToItem(setEntity.getOffHand(), "offHand"));
+    private EquipmentSetResponse parseSetEntityToEquipmentSetResponse(EquipmentEntity setEntity, String character){
+        List<ItemResponse> itemResponseList = new LinkedList<>();
 
-        return ItemSetResponse.builder()
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getHead(), "head"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getNeck(), "neck"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getShoulders(), "shoulders"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getChest(), "chest"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getBack(), "back"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getWrists(), "wrists"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getHands(), "hands"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getWaist(), "waist"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getLegs(), "legs"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFeet(), "feet"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFirstRing(), "firstRing"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getSecondRing(), "secondRing"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFirstTrinket(), "firstTrinket"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getSecondTrinket(), "secondTrinket"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getMainHand(), "mainHand"));
+        itemResponseList.add(parseItemSetEntityToItem(setEntity.getOffHand(), "offHand"));
+
+        return EquipmentSetResponse.builder()
+                .id(setEntity.getId())
                 .characterName(character)
                 .name(setEntity.getName())
                 .specialization(setEntity.getSpecialization())
-                .itemList(itemResponses)
+                .itemList(itemResponseList)
                 .build();
     }
 
@@ -153,6 +160,5 @@ public class CharacterEquipmentSetService {
         if(entity == null) return ItemResponse.builder().slot(slotName).build();
         return servicesUtil.parseItemEntityToItem(entity.getItem(),entity.getItemLevel(),entity.getSocket(),slotName);
     }
-
 
 }

@@ -9,8 +9,8 @@ import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.item.enums.ItemTypes;
 import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
 import pl.bloniarz.bis.model.dto.exceptions.AppException;
-import pl.bloniarz.bis.model.dto.response.ItemResponse;
-import pl.bloniarz.bis.repository.CharacterEquipmentSetRepository;
+import pl.bloniarz.bis.model.dto.response.item.ItemResponse;
+import pl.bloniarz.bis.repository.EquipmentSetRepository;
 import pl.bloniarz.bis.repository.CharacterRepository;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ServicesUtil {
 
     private final CharacterRepository characterRepository;
-    private final CharacterEquipmentSetRepository characterEquipmentSetRepository;
+    private final EquipmentSetRepository equipmentSetRepository;
 
     public CharacterEntity getCharacterEntityFromNameAndActiveUser(String character, String activeUser) {
         return characterRepository.findByUsernameAndCharacterName(activeUser, character)
@@ -28,13 +28,14 @@ public class ServicesUtil {
     }
 
     public EquipmentEntity getSetEntityFromCharacterEntityAndSetId(long id, CharacterEntity characterEntity) {
-        return characterEquipmentSetRepository.findByIdAndCharacter(id, characterEntity)
+        return equipmentSetRepository.findByIdAndCharacter(id, characterEntity)
                 .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
     }
 
     public ItemResponse parseItemEntityToItem(ItemEntity item, int itemLevel, int socket, String slotName) {
         ItemTypes type = item.getType();
         ItemResponse itemResponse = ItemResponse.builder()
+                .id(item.getId())
                 .slot(slotName)
                 .name(item.getName())
                 .itemLevel(itemLevel)
