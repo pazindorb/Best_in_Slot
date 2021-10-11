@@ -58,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
         Pattern getCharacter = Pattern.compile("/api/characters/.+", Pattern.DOTALL);
@@ -68,6 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         ("/api/users".equals(path) && "POST".equals(method)) ||
                         ("/api/users/login".equals(path) && "POST".equals(method)) ||
                         ("/api/users/logout".equals(path) && "POST".equals(method)) ||
+                        ("/api/items".equals(path) && "GET".equals(method)) ||
                         (getCharacter.matcher(path).matches() && "GET".equals(method)) ||
                         (getItemSet.matcher(path).matches() && "GET".equals(method))
                 ;

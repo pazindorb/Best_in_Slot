@@ -48,8 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ).permitAll()
 
                 .antMatchers(GET,
-                        "/api/characters/{username:[a-zA-Z]}",
-                        "/api/{character:[\\c+]}/{id:[\\d+]}",
+                        "/api/characters/{*username}",
+                        "/api/{character}/{id}",
                         "/api/items"
                 ).permitAll()
 

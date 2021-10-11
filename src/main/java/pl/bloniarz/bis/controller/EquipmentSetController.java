@@ -41,8 +41,8 @@ public class EquipmentSetController {
     }
 
     @GetMapping("/{id}")
-    public EquipmentSetResponse getAllItemsFromSet(@PathVariable String character, @PathVariable long id, Principal principal) throws InvocationTargetException, IllegalAccessException {
-        return equipmentSetService.getAllItemsFromSet(id,character,principal.getName());
+    public EquipmentSetResponse getAllItemsFromSet(@PathVariable String character, @PathVariable long id) {
+        return equipmentSetService.getAllItemsFromSet(id,character);
     }
 
 }

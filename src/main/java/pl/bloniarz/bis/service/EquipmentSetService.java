@@ -117,8 +117,8 @@ public class EquipmentSetService {
     }
 
     @Transactional
-    public EquipmentSetResponse getAllItemsFromSet(long id, String character, String activeUser) throws InvocationTargetException, IllegalAccessException {
-        CharacterEntity characterEntity = characterRepository.findByUsernameAndCharacterName(activeUser, character)
+    public EquipmentSetResponse getAllItemsFromSet(long id, String character) {
+        CharacterEntity characterEntity = characterRepository.findByName(character)
                 .orElse(characterRepository.findByName(character)
                         .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND)));
 
