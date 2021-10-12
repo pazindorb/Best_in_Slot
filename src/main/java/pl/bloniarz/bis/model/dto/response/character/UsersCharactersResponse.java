@@ -13,6 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UsersCharactersResponse {
-    private String username;
     private List<CharacterResponse> characters;
 }

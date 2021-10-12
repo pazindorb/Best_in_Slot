@@ -69,6 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         ("/api/users/login".equals(path) && "POST".equals(method)) ||
                         ("/api/users/logout".equals(path) && "POST".equals(method)) ||
                         ("/api/items".equals(path) && "GET".equals(method)) ||
+                        ("/api/users".equals(path) && "GET".equals(method)) ||
                         (getCharacter.matcher(path).matches() && "GET".equals(method)) ||
                         (getItemSet.matcher(path).matches() && "GET".equals(method))
                 ;

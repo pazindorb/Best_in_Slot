@@ -48,9 +48,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ).permitAll()
 
                 .antMatchers(GET,
-                        "/api/characters/{*username}",
+                        "/api/characters/{id}",
                         "/api/{character}/{id}",
-                        "/api/items"
+                        "/api/items",
+                        "/api/users",
+                        "/api/users/{id}",
+                        "/api/characters/character/{id}"
                 ).permitAll()
 
 
@@ -59,6 +62,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ).hasAuthority("ROLE_ADMIN")
                 .antMatchers(POST,
                         "/api/items/**"
+                ).hasAuthority("ROLE_ADMIN")
+                .antMatchers(DELETE,
+                        "/api/users/{id}"
                 ).hasAuthority("ROLE_ADMIN")
 
                 .anyRequest().authenticated()

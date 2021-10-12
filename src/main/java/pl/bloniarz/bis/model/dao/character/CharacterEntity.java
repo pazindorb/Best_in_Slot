@@ -27,15 +27,20 @@ public class CharacterEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Column(unique = true)
     private String name;
 
     @Enumerated
     private CharacterClasses characterClass;
 
-    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL)
     private List<EquipmentEntity> characterEquipmentSets;
 
+    private boolean active;
 
+    public void delete(){
+        name = "";
+        active = false;
+        characterEquipmentSets.forEach(EquipmentEntity::delete);
+    }
 
 }

@@ -290,12 +290,13 @@ public class FirstTimeRunConfig implements CommandLineRunner {
                 .authority("ROLE_USER")
                 .build()));
 
-        String password = encoder.encode("adminpassword");
+        String password = encoder.encode("admin123");
         UserEntity userEntity = UserEntity.builder()
-                .email("bloniarzpatryk@gmail.pl")
-                .login("administrator")
+                .email("admin@gmail.pl")
+                .login("admin")
                 .password(password)
                 .authorities(listOfAuthorities)
+                .active(true)
                 .build();
 
         userRepository.save(userEntity);

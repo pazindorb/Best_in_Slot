@@ -17,14 +17,12 @@ import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.ItemSetRepository;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class EquipmentSetService {
 
-    private final CharacterRepository characterRepository;
     private final EquipmentSetRepository setRepository;
     private final ItemRepository itemRepository;
     private final ItemSetRepository itemSetRepository;
@@ -36,15 +34,17 @@ public class EquipmentSetService {
                 .name(set.getName())
                 .specialization(set.getSpecialization())
                 .character(characterEntity)
+                .active(true)
                 .build();
         setEntity = setRepository.save(setEntity);
-        return parseSetEntityToEquipmentSetResponse(setEntity, character);
+        return servicesUtil.parseSetEntityToEquipmentSetResponse(setEntity, character, true);
     }
 
     public void deleteEquipmentSet(String character, long id, String activeUser) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
         EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
-        setRepository.delete(setEntity);
+        setEntity.delete();
+        setRepository.save(setEntity);
     }
 
     @Transactional
@@ -113,52 +113,15 @@ public class EquipmentSetService {
                     throw new AppException(AppErrorMessage.SLOT_NOT_FOUND);
             }
         });
-        return parseSetEntityToEquipmentSetResponse(setEntity, character);
+        return servicesUtil.parseSetEntityToEquipmentSetResponse(setEntity, character, true);
     }
 
     @Transactional
     public EquipmentSetResponse getAllItemsFromSet(long id, String character) {
-        CharacterEntity characterEntity = characterRepository.findByName(character)
-                .orElse(characterRepository.findByName(character)
-                        .orElseThrow(() -> new AppException(AppErrorMessage.CHARACTER_NOT_FOUND)));
+        EquipmentEntity setEntity = setRepository.findByIdAndCharacterName(id, character)
+                .orElseThrow(() -> new AppException(AppErrorMessage.SET_NOT_FOUND));
 
-        EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
-
-        return parseSetEntityToEquipmentSetResponse(setEntity, character);
-    }
-
-    private EquipmentSetResponse parseSetEntityToEquipmentSetResponse(EquipmentEntity setEntity, String character){
-        List<ItemResponse> itemResponseList = new LinkedList<>();
-
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getHead(), "head"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getNeck(), "neck"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getShoulders(), "shoulders"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getChest(), "chest"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getBack(), "back"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getWrists(), "wrists"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getHands(), "hands"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getWaist(), "waist"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getLegs(), "legs"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFeet(), "feet"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFirstRing(), "firstRing"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getSecondRing(), "secondRing"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getFirstTrinket(), "firstTrinket"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getSecondTrinket(), "secondTrinket"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getMainHand(), "mainHand"));
-        itemResponseList.add(parseItemSetEntityToItem(setEntity.getOffHand(), "offHand"));
-
-        return EquipmentSetResponse.builder()
-                .id(setEntity.getId())
-                .characterName(character)
-                .name(setEntity.getName())
-                .specialization(setEntity.getSpecialization())
-                .itemList(itemResponseList)
-                .build();
-    }
-
-    private ItemResponse parseItemSetEntityToItem(ItemSetEntity entity, String slotName) {
-        if(entity == null) return ItemResponse.builder().slot(slotName).build();
-        return servicesUtil.parseItemEntityToItem(entity.getItem(),entity.getItemLevel(),entity.getSocket(),slotName);
+        return servicesUtil.parseSetEntityToEquipmentSetResponse(setEntity, character, true);
     }
 
 }

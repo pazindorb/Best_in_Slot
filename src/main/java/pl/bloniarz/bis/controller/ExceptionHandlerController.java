@@ -2,6 +2,7 @@ package pl.bloniarz.bis.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +24,14 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<AppErrorResponse> handleValidationException(MethodArgumentNotValidException exception){
+        log.error("[{}] Message: {}", exception.getClass().getSimpleName(), exception.getMessage());
+        return ResponseEntity
+                .status(AppErrorMessage.VALIDATION_FAILED.getStatus())
+                .body(new AppErrorResponse(AppErrorMessage.VALIDATION_FAILED.getMessage()));
+    }
+
+    @ExceptionHandler({BadCredentialsException.class})
+    public ResponseEntity<AppErrorResponse> handleBadCredentialsException(BadCredentialsException exception){
         log.error("[{}] Message: {}", exception.getClass().getSimpleName(), exception.getMessage());
         return ResponseEntity
                 .status(AppErrorMessage.VALIDATION_FAILED.getStatus())
