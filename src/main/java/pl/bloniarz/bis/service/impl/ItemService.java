@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.service;
+package pl.bloniarz.bis.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,8 @@ import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.response.item.*;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.StatsEquationRepository;
+import pl.bloniarz.bis.service.IItemService;
+import pl.bloniarz.bis.service.ServicesUtil;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,12 +24,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ItemService {
+public class ItemService implements IItemService {
 
     private final ItemRepository itemRepository;
     private final StatsEquationRepository statsEquationRepository;
     private final ServicesUtil servicesUtil;
 
+    @Override
     @Transactional
     public AddedItemsResponse addAllItemsToDatabase(List<WowheadItemResponse> wowheadItemResponseList, String dropInstance){
         List<ItemEntity> itemEntityList = itemRepository.saveAll(parseWowheadItemResponseListToItemEntityList(wowheadItemResponseList));
@@ -39,6 +42,7 @@ public class ItemService {
                 .build();
     }
 
+    @Override
     @Transactional
     public ItemsForSlotResponse getItemsForSlot(ItemSlots slot, int itemLevel) {
         List <ItemEntity> itemEntityList = itemRepository.findBySlotAndOldIsFalse(slot);
@@ -54,6 +58,7 @@ public class ItemService {
 
     }
 
+    @Override
     @Transactional
     public OldItemCollectionResponse setAllItemsFromDropInstanceToOld(String dropInstance) {
         List<ItemEntity> items = itemRepository.findByDropInstance(dropInstance);
@@ -70,6 +75,7 @@ public class ItemService {
                 .build();
     }
 
+    @Override
     @Transactional
     public OldItemResponse setItemWithSpecificIdToOld(long id) {
         ItemEntity item = itemRepository.findById(id)

@@ -9,7 +9,8 @@ import pl.bloniarz.bis.model.dto.request.user.UserPasswordCheck;
 import pl.bloniarz.bis.model.dto.request.user.UserRegisterRequest;
 import pl.bloniarz.bis.model.dto.request.user.UserUpdateRequest;
 import pl.bloniarz.bis.model.dto.response.user.UserResponse;
-import pl.bloniarz.bis.service.UserService;
+import pl.bloniarz.bis.service.IUserService;
+import pl.bloniarz.bis.service.impl.UserService;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -22,7 +23,7 @@ import java.util.List;
 @Validated
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
 
     @ResponseStatus(HttpStatus.CREATED)

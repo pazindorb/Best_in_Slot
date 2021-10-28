@@ -4,14 +4,11 @@ package pl.bloniarz.bis.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.bloniarz.bis.config.security.JwtUtil;
 import pl.bloniarz.bis.model.dto.request.equipment.EquipmentRequest;
 import pl.bloniarz.bis.model.dto.request.equipment.ItemSetRequest;
 import pl.bloniarz.bis.model.dto.response.equipment.EquipmentSetResponse;
-import pl.bloniarz.bis.service.EquipmentSetService;
+import pl.bloniarz.bis.service.IEquipmentSetService;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.List;
 
@@ -20,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/{character}")
 public class EquipmentSetController {
 
-    private final EquipmentSetService equipmentSetService;
+    private final IEquipmentSetService equipmentSetService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping

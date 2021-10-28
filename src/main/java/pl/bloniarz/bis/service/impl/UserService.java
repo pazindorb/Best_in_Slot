@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.service;
+package pl.bloniarz.bis.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,10 +24,10 @@ import pl.bloniarz.bis.model.dto.response.user.UserResponse;
 import pl.bloniarz.bis.repository.AuthorityRepository;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.UserRepository;
+import pl.bloniarz.bis.service.IUserService;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.validation.Validator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final CharacterRepository characterRepository;
@@ -47,6 +46,7 @@ public class UserService {
     private final UserDetailsService detailsService;
     private final JwtUtil jwtUtil;
 
+    @Override
     public long register(UserRegisterRequest userRegisterRequest){
         List<UserAuthorityEntity> authority = Collections.singletonList(authorityRepository.findByAuthority("ROLE_USER"));
 
@@ -65,6 +65,7 @@ public class UserService {
     }
 
 
+    @Override
     public void login(UserLoginRequest userLoginRequest, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userLoginRequest.getLogin(), userLoginRequest.getPassword());
@@ -81,11 +82,13 @@ public class UserService {
         response.addCookie(refreshCookie);
     }
 
+    @Override
     public void logout(HttpServletResponse response){
         jwtUtil.removeAccessTokenCookie(response);
         jwtUtil.removeRefreshTokenCookie(response);
     }
 
+    @Override
     public List<UserResponse> getUsers(int pageNumber, String sortBy, boolean descending) {
         int pageSize = 10;
         Pageable page;
@@ -104,6 +107,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public UserResponse getUser(long id) {
         UserEntity userEntity = userRepository.findByIdAndActiveIsTrue(id)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND_ID));
@@ -111,6 +115,7 @@ public class UserService {
         return parseUserEntityToUserResponse(userEntity);
     }
 
+    @Override
     @Transactional
     public void deleteUserAdmin(long id, String adminName, UserPasswordCheck password) {
         UserEntity admin = userRepository.findByLoginAndActiveIsTrue(adminName)
@@ -126,6 +131,7 @@ public class UserService {
         userRepository.save(userEntity);
     }
 
+    @Override
     @Transactional
     public void deleteUserAdmin(String username, UserPasswordCheck password) {
         UserEntity userEntity = userRepository.findByLoginAndActiveIsTrue(username)
@@ -138,6 +144,7 @@ public class UserService {
         userRepository.save(userEntity);
     }
 
+    @Override
     public void updateUser(String login, UserUpdateRequest userUpdateRequest) {
         UserEntity userEntity = userRepository.findByLoginAndActiveIsTrue(login)
                 .orElseThrow(() ->  new AppException(AppErrorMessage.USER_NOT_FOUND_ID));

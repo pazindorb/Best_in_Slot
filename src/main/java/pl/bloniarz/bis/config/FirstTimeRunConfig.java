@@ -6,14 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.bloniarz.bis.externalapi.WowheadHttpClient;
 import pl.bloniarz.bis.externalapi.model.LootSource;
-import pl.bloniarz.bis.externalapi.model.WowheadItemResponse;
 import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.user.UserAuthorityEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 import pl.bloniarz.bis.repository.AuthorityRepository;
 import pl.bloniarz.bis.repository.StatsEquationRepository;
 import pl.bloniarz.bis.repository.UserRepository;
-import pl.bloniarz.bis.service.ItemService;
+import pl.bloniarz.bis.service.IItemService;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -26,7 +25,7 @@ import java.util.List;
 public class FirstTimeRunConfig implements CommandLineRunner {
 
     private final WowheadHttpClient wowheadHttpClient;
-    private final ItemService itemService;
+    private final IItemService itemService;
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
     private final PasswordEncoder encoder;

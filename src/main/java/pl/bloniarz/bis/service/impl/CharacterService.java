@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.service;
+package pl.bloniarz.bis.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,27 +15,31 @@ import pl.bloniarz.bis.model.dto.response.character.CharacterResponse;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.EquipmentSetRepository;
 import pl.bloniarz.bis.repository.UserRepository;
+import pl.bloniarz.bis.service.ICharacterService;
+import pl.bloniarz.bis.service.ServicesUtil;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CharacterService {
+public class CharacterService implements ICharacterService {
 
     private final ServicesUtil servicesUtil;
     private final CharacterRepository characterRepository;
     private final UserRepository userRepository;
     private final EquipmentSetRepository equipmentSetRepository;
 
+    @Override
     public UsersCharactersResponse getAllCharactersForUser(String username) {
         return getUsersCharactersFromUsername(username);
     }
+    @Override
     public UsersCharactersResponse getAllCharactersForUser(long id) {
         return getUsersCharactersFromUserId(id);
     }
 
+    @Override
     public CharacterResponse addCharacter(CharacterRequest characterRequest, String username) {
         UserEntity userEntity = userRepository.findByLoginAndActiveIsTrue(username)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, username));
@@ -51,6 +55,7 @@ public class CharacterService {
         return parseCharacterEntityToCharacterResponse(characterEntity);
     }
 
+    @Override
     @Transactional
     public void deleteCharacter(long id, String username) {
         CharacterEntity characterEntity = characterRepository.findByIdAndActiveIsTrue(id)
@@ -60,6 +65,7 @@ public class CharacterService {
         characterRepository.save(characterEntity);
     }
 
+    @Override
     @Transactional
     public CharacterResponseWithCollections getCharacterWithEquipmentSets(long id) {
         CharacterEntity characterEntity = characterRepository.findByIdAndActiveIsTrue(id)
@@ -68,6 +74,7 @@ public class CharacterService {
         return parseCharacterEntityToDetailedCharacter(characterEntity);
     }
 
+    @Override
     public CharacterResponse editCharacter(CharacterRequest characterRequest, String username, long id) {
         CharacterEntity characterEntity = characterRepository.findByIdAndActiveIsTrue(id)
                 .filter(character -> character.getUser().getLogin().equals(username))

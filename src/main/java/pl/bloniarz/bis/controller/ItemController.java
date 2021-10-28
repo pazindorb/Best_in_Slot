@@ -7,16 +7,14 @@ import pl.bloniarz.bis.externalapi.WowheadHttpClient;
 import pl.bloniarz.bis.externalapi.model.LootSource;
 import pl.bloniarz.bis.model.dao.item.enums.ItemSlots;
 import pl.bloniarz.bis.model.dto.response.item.*;
-import pl.bloniarz.bis.service.ItemService;
-
-import java.util.List;
+import pl.bloniarz.bis.service.IItemService;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/items")
 public class ItemController {
 
-    private final ItemService itemService;
+    private final IItemService itemService;
     private final WowheadHttpClient wowheadHttpClient;
 
     @ResponseStatus(HttpStatus.OK)

@@ -44,7 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST,
                         "/api/users",
                         "/api/users/login",
-                        "/api/users/logout"
+                        "/api/users/logout",
+                        "/api/refresh"
                 ).permitAll()
 
                 .antMatchers(GET,

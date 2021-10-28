@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.service;
+package pl.bloniarz.bis.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,18 +16,21 @@ import pl.bloniarz.bis.repository.EquipmentSetRepository;
 import pl.bloniarz.bis.repository.CharacterRepository;
 import pl.bloniarz.bis.repository.ItemRepository;
 import pl.bloniarz.bis.repository.ItemSetRepository;
+import pl.bloniarz.bis.service.IEquipmentSetService;
+import pl.bloniarz.bis.service.ServicesUtil;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class EquipmentSetService {
+public class EquipmentSetService implements IEquipmentSetService {
 
     private final EquipmentSetRepository setRepository;
     private final ItemRepository itemRepository;
     private final ItemSetRepository itemSetRepository;
     private final ServicesUtil servicesUtil;
 
+    @Override
     public EquipmentSetResponse addEquipmentSet(String character, String activeUser, EquipmentRequest set) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
         EquipmentEntity setEntity = EquipmentEntity.builder()
@@ -40,6 +43,7 @@ public class EquipmentSetService {
         return servicesUtil.parseSetEntityToEquipmentSetResponse(setEntity, character, true);
     }
 
+    @Override
     public void deleteEquipmentSet(String character, long id, String activeUser) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
         EquipmentEntity setEntity = servicesUtil.getSetEntityFromCharacterEntityAndSetId(id, characterEntity);
@@ -47,6 +51,7 @@ public class EquipmentSetService {
         setRepository.save(setEntity);
     }
 
+    @Override
     @Transactional
     public EquipmentSetResponse changeItemsInSet(long id, String character, String activeUser, List<ItemSetRequest> items) {
         CharacterEntity characterEntity = servicesUtil.getCharacterEntityFromNameAndActiveUser(character, activeUser);
@@ -116,6 +121,7 @@ public class EquipmentSetService {
         return servicesUtil.parseSetEntityToEquipmentSetResponse(setEntity, character, true);
     }
 
+    @Override
     @Transactional
     public EquipmentSetResponse getAllItemsFromSet(long id, String character) {
         EquipmentEntity setEntity = setRepository.findByIdAndCharacterName(id, character)

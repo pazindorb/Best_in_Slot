@@ -38,7 +38,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("Filtrowanie");
         DecodedJWT accessToken = jwtUtil.verifyTokenFromCookie("access_token", request.getCookies());
 
         String username = accessToken.getSubject();
@@ -68,6 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         ("/api/users".equals(path) && "POST".equals(method)) ||
                         ("/api/users/login".equals(path) && "POST".equals(method)) ||
                         ("/api/users/logout".equals(path) && "POST".equals(method)) ||
+                        ("/api/refresh".equals(path) && "POST".equals(method)) ||
                         ("/api/items".equals(path) && "GET".equals(method)) ||
                         ("/api/users".equals(path) && "GET".equals(method)) ||
                         (getCharacter.matcher(path).matches() && "GET".equals(method)) ||

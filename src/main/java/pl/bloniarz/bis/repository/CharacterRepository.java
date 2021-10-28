@@ -39,8 +39,6 @@ public interface CharacterRepository extends JpaRepository<CharacterEntity, Long
             "AND active = true", nativeQuery = true)
     Optional<CharacterEntity> findByUsernameAndCharacterName(String username, String characterName);
 
-    Optional<CharacterEntity> findByNameAndActiveIsTrue(String name);
-
     @Query(value = "Select count(user_id) " +
             "from characters " +
             "where user_id = ?1 " +
