@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,7 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import pl.bloniarz.bis.config.security.jwt.JwtFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import pl.bloniarz.bis.config.security.filter.FilterExceptionHandler;
+import pl.bloniarz.bis.config.security.filter.JwtFilter;
+
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
 
 @Configuration
 @EnableWebSecurity
@@ -26,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService detailsService;
     private final JwtFilter jwtFilter;
-
+    private final FilterExceptionHandler filterExceptionHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -37,14 +41,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "api/users").permitAll()
-                .antMatchers(HttpMethod.POST, "api/users/login").permitAll()
-                .antMatchers(HttpMethod.POST, "api/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "api/**").authenticated()
-                .antMatchers(HttpMethod.PATCH, "api/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "api/").authenticated()
-                .antMatchers(HttpMethod.PATCH, "/api/items/**").hasRole("ADMIN")
-                .anyRequest().permitAll();
+                .antMatchers(POST,
+                        "/api/users",
+                        "/api/users/login",
+                        "/api/users/logout",
+                        "/api/refresh"
+                ).permitAll()
+
+                .antMatchers(GET,
+                        "/api/characters/{id}",
+                        "/api/{character}/{id}",
+                        "/api/items",
+                        "/api/users",
+                        "/api/users/{id}",
+                        "/api/characters/character/{id}"
+                ).permitAll()
+
+
+                .antMatchers(PATCH,
+                        "/api/items/**"
+                ).hasAuthority("ROLE_ADMIN")
+                .antMatchers(POST,
+                        "/api/items/**"
+                ).hasAuthority("ROLE_ADMIN")
+                .antMatchers(DELETE,
+                        "/api/users/{id}"
+                ).hasAuthority("ROLE_ADMIN")
+
+                .anyRequest().authenticated()
+        ;
 
         http
                 .csrf().disable()
@@ -56,6 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
 
                 .and()
+                .addFilterBefore(filterExceptionHandler, LogoutFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 

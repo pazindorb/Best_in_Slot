@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto.request.equipmentset;
+package pl.bloniarz.bis.model.dto.response.character;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CharacterEquipmentSetRequest {
-
+public class CharacterResponse {
+    private long id;
     private String name;
-    private String specialization;
-
+    private String characterClass;
+    private int numberOfSets;
 }

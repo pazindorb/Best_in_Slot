@@ -7,8 +7,8 @@ public class SimpleMessageResponse {
 
     private final String message;
 
-    public SimpleMessageResponse(String mess){
-        message = mess;
+    public SimpleMessageResponse(String message){
+        this.message = message;
     }
 
 }

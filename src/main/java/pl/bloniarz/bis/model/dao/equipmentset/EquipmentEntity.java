@@ -14,67 +14,73 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "CHARACTER_EQUIPMENT_SETS")
-public class CharacterEquipmentSetEntity {
+@Table(name = "EQUIPMENT")
+public class EquipmentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "set_id")
+    @Column(name = "equipment_id")
     private long id;
 
     private String name;
     private String specialization;
+    private boolean active;
 
     @ManyToOne
     @JoinColumn(name = "character_id")
     private CharacterEntity character;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity head;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity neck;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity shoulders;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity chest;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity back;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity wrists;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity hands;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity waist;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity legs;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity feet;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity firstRing;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity secondRing;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity firstTrinket;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity secondTrinket;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity mainHand;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne
     private ItemSetEntity offHand;
 
+    public void delete(){
+        name = "";
+        specialization = "";
+        active = false;
+    }
 }

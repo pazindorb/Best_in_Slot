@@ -1,9 +1,8 @@
-package pl.bloniarz.bis.model.dto.request.equipmentset;
+package pl.bloniarz.bis.model.dto.request.equipment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dao.item.ItemEntity;
 
 @Data
 @NoArgsConstructor

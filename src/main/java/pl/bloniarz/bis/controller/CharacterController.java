@@ -4,45 +4,55 @@ package pl.bloniarz.bis.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.bloniarz.bis.model.dto.response.AllUsersCharactersResponse;
-import pl.bloniarz.bis.model.dto.Character;
-import pl.bloniarz.bis.model.dto.response.SimpleMessageResponse;
-import pl.bloniarz.bis.service.CharacterService;
+import pl.bloniarz.bis.model.dto.request.character.CharacterRequest;
+import pl.bloniarz.bis.model.dto.response.character.CharacterResponseWithCollections;
+import pl.bloniarz.bis.model.dto.response.character.UsersCharactersResponse;
+import pl.bloniarz.bis.model.dto.response.character.CharacterResponse;
+import pl.bloniarz.bis.service.ICharacterService;
+import pl.bloniarz.bis.service.impl.CharacterService;
 
-import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/characters")
 public class CharacterController {
 
-    private final CharacterService characterService;
+    private final ICharacterService characterService;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public AllUsersCharactersResponse getAllCharactersForActiveUser(HttpServletRequest request){
-        return characterService.getAllCharactersForUser(request.getCookies());
+    public UsersCharactersResponse getAllCharactersForActiveUser(Principal principal){
+        return characterService.getAllCharactersForUser(principal.getName());
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/{username}")
-    public AllUsersCharactersResponse getAllCharactersForUsername(@PathVariable String username){
-        return characterService.getAllCharactersForUser(username);
+    @GetMapping("/{id}")
+    public UsersCharactersResponse getAllCharactersForUsername(@PathVariable long id){
+        return characterService.getAllCharactersForUser(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/character/{id}")
+    public CharacterResponseWithCollections getCharacterWithEquipmentSets(@PathVariable long id){
+        return characterService.getCharacterWithEquipmentSets(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public SimpleMessageResponse addCharacter(@RequestBody Character character, HttpServletRequest request){
-        String activeUser = characterService.addCharacter(character, request.getCookies());
-        return new SimpleMessageResponse(character.getName() + " added to user: " + activeUser);
+    public CharacterResponse addCharacter(@RequestBody CharacterRequest characterRequest, Principal principal){
+        return characterService.addCharacter(characterRequest, principal.getName());
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @DeleteMapping("/{id}")
-    public SimpleMessageResponse deleteCharacter(@PathVariable long id, HttpServletRequest request){
-        String characterName = characterService.deleteCharacter(id, request.getCookies());
-        return new SimpleMessageResponse(characterName + " deleted");
+    @PatchMapping("/{id}")
+    public CharacterResponse editCharacter(@RequestBody CharacterRequest characterRequest, Principal principal, @PathVariable long id){
+        return characterService.editCharacter(characterRequest, principal.getName(), id);
     }
 
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void deleteCharacter(@PathVariable long id, Principal principal){
+        characterService.deleteCharacter(id, principal.getName());
+    }
 }

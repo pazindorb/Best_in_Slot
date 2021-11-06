@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dao.equipmentset.CharacterEquipmentSetEntity;
+import pl.bloniarz.bis.model.dao.equipmentset.EquipmentEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 
 import javax.persistence.*;
@@ -27,15 +27,20 @@ public class CharacterEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Column(unique = true)
     private String name;
 
     @Enumerated
     private CharacterClasses characterClass;
 
-    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval=true)
-    private List<CharacterEquipmentSetEntity> characterEquipmentSets;
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL)
+    private List<EquipmentEntity> characterEquipmentSets;
 
+    private boolean active;
 
+    public void delete(){
+        name = "";
+        active = false;
+        characterEquipmentSets.forEach(EquipmentEntity::delete);
+    }
 
 }

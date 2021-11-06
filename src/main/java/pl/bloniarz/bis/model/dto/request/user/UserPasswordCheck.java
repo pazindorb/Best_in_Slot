@@ -1,4 +1,4 @@
-package pl.bloniarz.bis.model.dto;
+package pl.bloniarz.bis.model.dto.request.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Character {
-    private String name;
-    private String characterClass;
-    private int numberOfSets;
+public class UserPasswordCheck {
+    private String password;
 }

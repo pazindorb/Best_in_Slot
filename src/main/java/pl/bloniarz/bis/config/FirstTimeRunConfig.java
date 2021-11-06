@@ -6,30 +6,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.bloniarz.bis.externalapi.WowheadHttpClient;
 import pl.bloniarz.bis.externalapi.model.LootSource;
-import pl.bloniarz.bis.externalapi.model.WowheadItemResponse;
 import pl.bloniarz.bis.model.dao.item.StatsEquationEntity;
 import pl.bloniarz.bis.model.dao.user.UserAuthorityEntity;
 import pl.bloniarz.bis.model.dao.user.UserEntity;
 import pl.bloniarz.bis.repository.AuthorityRepository;
 import pl.bloniarz.bis.repository.StatsEquationRepository;
 import pl.bloniarz.bis.repository.UserRepository;
-import pl.bloniarz.bis.service.ItemService;
+import pl.bloniarz.bis.service.IItemService;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
 public class FirstTimeRunConfig implements CommandLineRunner {
 
     private final WowheadHttpClient wowheadHttpClient;
-    private final ItemService itemService;
+    private final IItemService itemService;
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
     private final PasswordEncoder encoder;
@@ -37,17 +33,87 @@ public class FirstTimeRunConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //populateAuthoritiesAndCreateAdmin();
-        //populateDatabaseWithStatsEquations();
-        //populateDatabaseWithWowheadItems();
+//        populateAuthoritiesAndCreateAdmin();
+//        populateDatabaseWithStatsEquations();
+//        populateDatabaseWithWowheadItems();
     }
 
     private void populateDatabaseWithWowheadItems() {
-        for (LootSource value : LootSource.values()) {
-            List<WowheadItemResponse> list = wowheadHttpClient.getItemsListForLootSource(value);
-            itemService.addAllItemsToDatabase(list);
-            System.out.println(value.getSourceName() + " : Added");
-        }
+        List<LootSource> lootSourceList = new LinkedList<>();
+        lootSourceList.add(LootSource.builder()
+                .sourceName("De Other Side")
+                .searchRequirements("220:195;13309:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Halls of Atonement")
+                .searchRequirements("220:195;12831:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Mists of Trina Scithe")
+                .searchRequirements("220:195;13334:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Plaguefall")
+                .searchRequirements("220:195;13228:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Sanguine Depths")
+                .searchRequirements("220:195;12842:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Spires of Ascension")
+                .searchRequirements("220:195;12837:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("The Necrotic Wake")
+                .searchRequirements("220:195;12916:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Theater of Pain")
+                .searchRequirements("220:195;12841:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(158)
+                .maxIlvl(158)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("Castle Nathria")
+                .searchRequirements("212:195;13224:1;0:0")
+                .expansion("Shadowlands")
+                .minIlvl(200)
+                .maxIlvl(207)
+                .build());
+        lootSourceList.add(LootSource.builder()
+                .sourceName("PvP")
+                .searchRequirements("129:195;0:1;168011:0")
+                .expansion("Shadowlands")
+                .minIlvl(200)
+                .maxIlvl(200)
+                .build());
+
+        lootSourceList.forEach(value -> {
+            itemService.addAllItemsToDatabase(wowheadHttpClient.getItemsListForLootSource(value), value.getSourceName());
+        });
     }
 
     private void populateDatabaseWithStatsEquations() throws ParseException {
@@ -223,12 +289,13 @@ public class FirstTimeRunConfig implements CommandLineRunner {
                 .authority("ROLE_USER")
                 .build()));
 
-        String password = encoder.encode("adminpassword");
+        String password = encoder.encode("admin123");
         UserEntity userEntity = UserEntity.builder()
-                .email("bloniarzpatryk@gmail.pl")
-                .login("administrator")
+                .email("admin@gmail.pl")
+                .login("admin")
                 .password(password)
                 .authorities(listOfAuthorities)
+                .active(true)
                 .build();
 
         userRepository.save(userEntity);

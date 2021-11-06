@@ -2,21 +2,20 @@ package pl.bloniarz.bis.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import pl.bloniarz.bis.model.dto.exceptions.AppErrorMessage;
-import pl.bloniarz.bis.model.dto.exceptions.AppException;
 import pl.bloniarz.bis.model.dto.request.user.UserLoginRequest;
+import pl.bloniarz.bis.model.dto.request.user.UserPasswordCheck;
 import pl.bloniarz.bis.model.dto.request.user.UserRegisterRequest;
-import pl.bloniarz.bis.model.dto.response.SimpleMessageResponse;
-import pl.bloniarz.bis.service.UserService;
+import pl.bloniarz.bis.model.dto.request.user.UserUpdateRequest;
+import pl.bloniarz.bis.model.dto.response.user.UserResponse;
+import pl.bloniarz.bis.service.IUserService;
+import pl.bloniarz.bis.service.impl.UserService;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Arrays;
+import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -24,31 +23,55 @@ import java.util.Arrays;
 @Validated
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public SimpleMessageResponse register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
-        userService.register(userRegistrationRequest);
-        return new SimpleMessageResponse(userRegistrationRequest.getLogin() + " registered");
+    public long register(@Valid @RequestBody UserRegisterRequest userRegistrationRequest){
+        return userService.register(userRegistrationRequest);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")
-    public SimpleMessageResponse login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
-        response.addCookie(userService.login(userLoginRequest));
-        return new SimpleMessageResponse("Login successful for: " + userLoginRequest.getLogin());
+    public void login(@RequestBody UserLoginRequest userLoginRequest, HttpServletResponse response){
+        userService.login(userLoginRequest, response);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/logout")
-    public SimpleMessageResponse logout(HttpServletRequest request, HttpServletResponse response){
-        Cookie cookie = Arrays.stream(request.getCookies())
-                .filter(cookies -> "authorization".equals(cookies.getName()))
-                .findAny()
-                .orElseThrow(() -> new AppException(AppErrorMessage.LOGOUT_FAILED));
-        response.addCookie(userService.logout(cookie));
-        return new SimpleMessageResponse("Logout successful");
+    public void logout(HttpServletResponse response){
+        userService.logout(response);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public List<UserResponse> getUsers(@RequestParam int page, @RequestParam(required = false) String sortBy, @RequestParam(required = false) boolean desc){
+        return userService.getUsers(page, sortBy, desc);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}")
+    public UserResponse getUser(@PathVariable long id){
+        return userService.getUser(id);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void deleteUserAdmin(@PathVariable long id, Principal principal, @RequestBody UserPasswordCheck password){
+        userService.deleteUserAdmin(id, principal.getName(), password);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping()
+    public void deleteUser(Principal principal, @RequestBody UserPasswordCheck password){
+        userService.deleteUserAdmin(principal.getName(), password);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping
+    public void updateUser(Principal principal, @RequestBody UserUpdateRequest userUpdateRequest){
+        userService.updateUser(principal.getName(), userUpdateRequest);
     }
 
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import pl.bloniarz.bis.model.dao.character.CharacterEntity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,10 +31,21 @@ public class UserEntity {
 
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<CharacterEntity> charactersList;
 
     @ManyToMany
     private List<UserAuthorityEntity> authorities;
+    
+    private boolean active;
+
+    public void delete(){
+        active = false;
+        login = String.valueOf(id);
+        email = String.valueOf(id);
+        password = "";
+        authorities = new ArrayList<>();
+        charactersList.forEach(CharacterEntity::delete);
+    }
 
 }

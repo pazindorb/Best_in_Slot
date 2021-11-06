@@ -1,10 +1,9 @@
-package pl.bloniarz.bis.model.dto.response;
+package pl.bloniarz.bis.model.dto.response.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.bloniarz.bis.model.dto.Character;
 
 import java.util.List;
 
@@ -12,6 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AllUsersCharactersResponse {
-    List<Character> characters;
+public class ItemsForSlotResponse {
+
+    private String slot;
+    private List<ItemResponse> items;
+
 }

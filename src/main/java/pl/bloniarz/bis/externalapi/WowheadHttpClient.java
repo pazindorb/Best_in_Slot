@@ -97,7 +97,7 @@ public class WowheadHttpClient {
         return extractIdsFromHtml(body.toString());
     }
     private List<String> extractIdsFromHtml(String htmlString) {
-        String words[] = htmlString.toString().split("addData");
+        String[] words = htmlString.split("addData");
         words = words[1].split("var tabsGroups");
         String s = words[0].substring(7, words[0].length() - 2);
 

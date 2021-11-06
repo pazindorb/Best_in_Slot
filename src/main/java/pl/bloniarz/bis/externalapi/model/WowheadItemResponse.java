@@ -1,9 +1,15 @@
 package pl.bloniarz.bis.externalapi.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class WowheadItemResponse {
     @JacksonXmlProperty(localName = "id")
     private int id;
