@@ -1,6 +1,7 @@
 package pl.bloniarz.bis.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bloniarz.bis.model.dao.character.CharacterClasses;
@@ -32,17 +33,28 @@ public class CharacterService implements ICharacterService {
 
     @Override
     public UsersCharactersResponse getAllCharactersForUser(String username) {
-        return getUsersCharactersFromUsername(username);
+        return UsersCharactersResponse.builder()
+                .characters(characterRepository.findAllCharactersOfUserNamed(username).stream()
+                        .map(this::parseCharacterEntityToCharacterResponse)
+                        .collect(Collectors.toList()))
+                .build();
     }
     @Override
     public UsersCharactersResponse getAllCharactersForUser(long id) {
-        return getUsersCharactersFromUserId(id);
+        return UsersCharactersResponse.builder()
+                .characters(characterRepository.findAllCharactersOfUserId(id).stream()
+                        .map(this::parseCharacterEntityToCharacterResponse)
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     @Override
     public CharacterResponse addCharacter(CharacterRequest characterRequest, String username) {
         UserEntity userEntity = userRepository.findByLoginAndActiveIsTrue(username)
                 .orElseThrow(() -> new AppException(AppErrorMessage.USER_NOT_FOUND, username));
+
+        if(!EnumUtils.isValidEnum(CharacterClasses.class, characterRequest.getCharacterClass()))
+                throw new AppException(AppErrorMessage.CLASS_DO_NOT_EXIST);
 
         CharacterEntity characterEntity = characterRepository.save(CharacterEntity.builder()
                 .user(userEntity)
@@ -58,9 +70,7 @@ public class CharacterService implements ICharacterService {
     @Override
     @Transactional
     public void deleteCharacter(long id, String username) {
-        CharacterEntity characterEntity = characterRepository.findByIdAndActiveIsTrue(id)
-                .filter(character -> character.getUser().getLogin().equals(username))
-                .orElseThrow(() -> new AppException(AppErrorMessage.NOT_OWNER));
+        CharacterEntity characterEntity = getCharacterEntityIfUserIsOwner(username, id);
         characterEntity.delete();
         characterRepository.save(characterEntity);
     }
@@ -76,12 +86,13 @@ public class CharacterService implements ICharacterService {
 
     @Override
     public CharacterResponse editCharacter(CharacterRequest characterRequest, String username, long id) {
-        CharacterEntity characterEntity = characterRepository.findByIdAndActiveIsTrue(id)
-                .filter(character -> character.getUser().getLogin().equals(username))
-                .orElseThrow(() -> new AppException(AppErrorMessage.NOT_OWNER));
-
-        if(!(characterRequest.getCharacterClass()==null || characterRequest.getCharacterClass().equals("")))
-            characterEntity.setCharacterClass(CharacterClasses.valueOf(characterRequest.getCharacterClass()));
+        CharacterEntity characterEntity = getCharacterEntityIfUserIsOwner(username, id);
+        if(!(characterRequest.getCharacterClass()==null || characterRequest.getCharacterClass().equals(""))){
+            if(EnumUtils.isValidEnum(CharacterClasses.class, characterRequest.getCharacterClass()))
+                characterEntity.setCharacterClass(CharacterClasses.valueOf(characterRequest.getCharacterClass()));
+            else
+                throw new AppException(AppErrorMessage.CLASS_DO_NOT_EXIST);
+        }
 
         if(!(characterRequest.getName()==null || characterRequest.getName().equals("")))
             characterEntity.setName(characterRequest.getName());
@@ -89,20 +100,10 @@ public class CharacterService implements ICharacterService {
         return parseCharacterEntityToCharacterResponse(characterRepository.save(characterEntity));
     }
 
-    private UsersCharactersResponse getUsersCharactersFromUsername(String username) {
-        return UsersCharactersResponse.builder()
-                .characters(characterRepository.findAllCharactersOfUserNamed(username).stream()
-                        .map(this::parseCharacterEntityToCharacterResponse)
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    private UsersCharactersResponse getUsersCharactersFromUserId(long id) {
-        return UsersCharactersResponse.builder()
-                .characters(characterRepository.findAllCharactersOfUserId(id).stream()
-                        .map(this::parseCharacterEntityToCharacterResponse)
-                        .collect(Collectors.toList()))
-                .build();
+    private CharacterEntity getCharacterEntityIfUserIsOwner(String username, long id){
+        return characterRepository.findByIdAndActiveIsTrue(id)
+                .filter(character -> character.getUser().getLogin().equals(username))
+                .orElseThrow(() -> new AppException(AppErrorMessage.NOT_OWNER));
     }
 
     private CharacterResponseWithCollections parseCharacterEntityToDetailedCharacter(CharacterEntity characterEntity){
