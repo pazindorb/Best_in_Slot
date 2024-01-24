@@ -4,7 +4,7 @@
 # TODO LIST
 | Task | Short description | Progress | Tested |
 | ------ | ------ | ------ | ----- |
-| 1 | User can create account, log into in and logout | Partially done | --- |
+| 1 | User can create account, login and logout | Partially done | --- |
 | 2 | Items to populate database are taken from wowhead's database | Done | --- |
 | 3 | User can create/delete charecters (saved in database) | Done | --- |
 | 4 | User can create/edit/delete item sets for his characters (saved in database) | Done | --- |
